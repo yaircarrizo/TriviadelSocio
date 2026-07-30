@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verdadero Fanatico</title>
+    <link rel="shortcut icon" href="logopag.png" type="image/x-icon">
+    <title>Trivia del Socio</title>
     <style>
         /* === ESTILOS GLOBALES === */
         body {
@@ -142,7 +143,6 @@
         .bg-huracan .question { color: #ffffff; text-shadow: 2px 2px 8px #000000, -1px -1px 4px #000000; }
         .bg-huracan .option-btn { background-color: rgba(0, 0, 0, 0.85); color: #ffffff; }
 
-        /* Dinámica Chicana (Fondo oscurecido) */
         .chicana-dark-mode::after {
             content: '';
             position: absolute;
@@ -188,7 +188,6 @@
             gap: 15px;
         }
 
-        /* Botones Ovalados del Menú */
         .sidebar-nav button {
             background: transparent;
             border: 2px solid #333;
@@ -197,7 +196,7 @@
             font-size: 1.2rem;
             cursor: pointer;
             text-align: center;
-            border-radius: 50px; /* Vuelve ovalados los botones */
+            border-radius: 50px;
             transition: all 0.3s ease;
         }
 
@@ -205,13 +204,58 @@
             background: #1a1a1a;
         }
 
-        /* Clase activa para el botón seleccionado */
         .sidebar-nav button.active-nav {
             background-color: #1a1a1a;
             border-color: #ffffff;
-            transform: scale(1.05); /* Agranda mínimamente */
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.8); /* Oscurece el interior */
+            transform: scale(1.05);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
         }
+
+        /* === PANTALLA DE LOGIN INICIAL === */
+        #login-screen {
+            background-color: #000000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 300;
+        }
+
+        .login-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 400px;
+            background: rgba(20, 20, 20, 0.9);
+            border: 2px solid #333;
+            padding: 40px 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(0,0,0,0.8);
+        }
+
+        .login-box h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            text-align: center;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 2px solid #ffffff;
+            border-radius: 50px;
+            color: #ffffff;
+            text-align: center;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .login-input::placeholder { color: #888; }
 
         /* === PANTALLA: MENÚ PRINCIPAL === */
         #menu-screen {
@@ -219,6 +263,14 @@
             justify-content: center;
             align-items: center;
             box-shadow: none; 
+        }
+
+        .user-greeting {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            text-align: center;
+            text-shadow: 2px 2px 4px #000;
+            color: #f5f2eb; /* Blanco hueso / amarillento */
         }
 
         .carousel-wrapper {
@@ -352,10 +404,42 @@
         .card-line.short { width: 60%; }
         .card-desc { font-size: 0.9rem; text-align: center; color: #cccccc; text-shadow: 1px 1px 2px #000; }
 
-        .leaderboard-table {
-            width: 100%;
+        .leaderboard-container {
             max-width: 800px;
             margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding-bottom: 40px;
+        }
+
+        .podium-box {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .podium-card {
+            background: rgba(0, 0, 0, 0.75);
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            width: 160px;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .podium-card.p1 { border-color: #ffd700; background: rgba(50, 40, 0, 0.85); }
+        .podium-card.p2 { border-color: #c0c0c0; box-shadow: 0 0 15px rgba(192, 192, 192, 0.4); }
+        .podium-card.p3 { border-color: #cd7f32; box-shadow: 0 0 15px rgba(205, 127, 50, 0.4); }
+
+        .podium-place { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+        .podium-name { font-size: 1rem; margin-bottom: 3px; font-weight: bold; }
+        .podium-details { font-size: 0.85rem; color: #ccc; }
+
+        .leaderboard-table {
+            width: 100%;
             border-collapse: collapse;
             background: rgba(0,0,0,0.6);
             border-radius: 10px;
@@ -532,7 +616,9 @@
                 <span></span>
                 <span></span>
             </button>
-            <figure class="logo-decoration">Logo</figure>
+            <figure class="logo-decoration" style="padding: 0; overflow: hidden; border: 2px solid #ffffff;">
+                <img src="logopag.png" alt="Logo" style="width: 100%; height: 100%; object-fit: cover;">
+            </figure>
         </div>
         <div class="timer-display" id="main-timer">00:00</div>
     </header>
@@ -546,7 +632,16 @@
         </nav>
     </aside>
 
-    <main id="menu-screen" class="screen active">
+    <div id="login-screen" class="screen active">
+        <div class="login-box">
+            <h2>Identifíquese, socio.</h2>
+            <input type="text" id="username-input" class="login-input" placeholder="Tu nombre de usuario" maxlength="15">
+            <button class="action-btn" style="display: block; position: relative;" onclick="handleLogin()">Ingresar</button>
+        </div>
+    </div>
+
+    <main id="menu-screen" class="screen">
+        <div id="user-greeting" class="user-greeting">¿Qué club te gusta, socio?</div>
         <div class="carousel-wrapper">
             <button class="carousel-btn" onclick="prevClub()">&#10094;</button>
             <div class="carousel-track">
@@ -561,24 +656,25 @@
 
     <main id="vitrina-screen" class="screen">
         <h1 class="screen-title">Tu Vitrina de Socios</h1>
-        <div class="vitrina-grid" id="vitrina-grid">
-            </div>
+        <div class="vitrina-grid" id="vitrina-grid"></div>
     </main>
 
     <main id="leaderboard-screen" class="screen">
         <h1 class="screen-title">Tabla de Posiciones</h1>
-        <table class="leaderboard-table">
-            <thead>
-                <tr>
-                    <th>N°</th>
-                    <th>Nombre</th>
-                    <th>Club</th>
-                    <th>Tiempo</th>
-                </tr>
-            </thead>
-            <tbody id="leaderboard-body">
-                </tbody>
-        </table>
+        <div class="leaderboard-container">
+            <div class="podium-box" id="podium-container"></div>
+            <table class="leaderboard-table" id="leaderboard-table-wrap">
+                <thead>
+                    <tr>
+                        <th>N°</th>
+                        <th>Nombre</th>
+                        <th>Club</th>
+                        <th>Tiempo</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body"></tbody>
+            </table>
+        </div>
     </main>
 
     <main id="game-screen" class="screen">
@@ -608,16 +704,38 @@
     </footer>
 
     <script>
-        // === GESTIÓN DE CLUBES ===
+        // === GESTIÓN DE USUARIO Y CLUBES ===
+        let currentPlayer = localStorage.getItem('vf_player') || "Socio Anónimo";
         const clubs = ["River Plate", "Boca Juniors", "Independiente", "Racing", "San Lorenzo", "Huracán"];
         let currentClubIndex = 0;
-        let unlockedClubs = {
+        
+        let unlockedClubs = JSON.parse(localStorage.getItem('vf_unlocked')) || {
             "River Plate": false, "Boca Juniors": false, "Independiente": false,
             "Racing": false, "San Lorenzo": false, "Huracán": false
         };
-        let leaderboardData = [];
+
+        let leaderboardData = JSON.parse(localStorage.getItem('vf_leaderboard')) || [];
         let gameTimer = 0;
         let timerInterval;
+        let feHinchaUsed = false;
+
+        // Auto-completar si ya hay usuario guardado en navegador
+        window.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('vf_player')) {
+                document.getElementById('username-input').value = currentPlayer;
+                document.getElementById('user-greeting').innerText = `¿Qué club te gusta, ${currentPlayer}?`;
+            }
+        });
+
+        function handleLogin() {
+            const inputVal = document.getElementById('username-input').value.trim();
+            if(inputVal !== "") {
+                currentPlayer = inputVal;
+                localStorage.setItem('vf_player', currentPlayer);
+            }
+            document.getElementById('user-greeting').innerText = `¿Qué club te gusta, ${currentPlayer}?`;
+            switchScreen('menu-screen', document.getElementById('nav-inicio'));
+        }
 
         function formatTime(seconds) {
             const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -648,19 +766,48 @@
         renderVitrina();
 
         function renderLeaderboard() {
+            const podiumBox = document.getElementById('podium-container');
             const tbody = document.getElementById('leaderboard-body');
+            const tableWrap = document.getElementById('leaderboard-table-wrap');
+            
+            podiumBox.innerHTML = '';
             tbody.innerHTML = '';
+
             const sortedData = [...leaderboardData].sort((a, b) => a.time - b.time);
-            sortedData.forEach((entry, index) => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${entry.name}</td>
-                        <td>${entry.club}</td>
-                        <td>${formatTime(entry.time)}</td>
-                    </tr>
+
+            // Renderizar el podio de los 3 primeros
+            const top3 = sortedData.slice(0, 3);
+            const medals = ["🥇 1° Puesto", "🥈 2° Puesto", "🥉 3° Puesto"];
+            const podiumClasses = ["p1", "p2", "p3"];
+
+            top3.forEach((entry, idx) => {
+                podiumBox.innerHTML += `
+                    <div class="podium-card ${podiumClasses[idx]}">
+                        <div class="podium-place">${medals[idx]}</div>
+                        <div class="podium-name">${entry.name}</div>
+                        <div class="podium-details">${entry.club}</div>
+                        <div class="podium-details" style="font-weight:bold; margin-top:4px;">${formatTime(entry.time)}</div>
+                    </div>
                 `;
             });
+
+            // Renderizar el resto de la tabla a partir del 4to puesto
+            const restOfPlayers = sortedData.slice(3);
+            if (restOfPlayers.length > 0) {
+                tableWrap.style.display = 'table';
+                restOfPlayers.forEach((entry, index) => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${index + 4}</td>
+                            <td>${entry.name}</td>
+                            <td>${entry.club}</td>
+                            <td>${formatTime(entry.time)}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tableWrap.style.display = 'none';
+            }
         }
 
         // === NAVEGACIÓN ===
@@ -670,7 +817,6 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
             
-            // Actualiza estilos visuales del menú lateral (Ovalados)
             if(btnElement) {
                 document.querySelectorAll('.sidebar-nav button').forEach(b => b.classList.remove('active-nav'));
                 btnElement.classList.add('active-nav');
@@ -719,9 +865,9 @@
             },
             "Boca Juniors": {
                 facil: [ { q: "¿Qué apodo recibe el hincha de Boca?", options: ["Millonario", "Xeneize", "Cuervo", "Leproso"], answer: 1 }, { q: "¿En qué estadio juega de local?", options: ["El Monumental", "La Bombonera", "El Cilindro", "José Amalfitani"], answer: 1 }, { q: "¿Cuáles son sus colores tradicionales?", options: ["Rojo y Blanco", "Azul y Oro", "Celeste y Blanco", "Rojo y Negro"], answer: 1 }, { q: "¿Cuál es su clásico rival?", options: ["Independiente", "San Lorenzo", "Racing", "River Plate"], answer: 3 }, { q: "¿En qué barrio está ubicado su estadio?", options: ["La Boca", "Avellaneda", "Boedo", "Núñez"], answer: 0 } ],
-                medio: [ { q: "¿Cuántas Copas Libertadores tiene Boca?", options: ["4", "5", "6", "7"], answer: 2 }, { q: "¿Quién es el máximo goleador de la historia del club?", options: ["Martín Palermo", "Roberto Cherro", "Francisco Varallo", "Domingo Tarasconi"], answer: 0 }, { q: "¿Qué DT ganó más Copas Libertadores con el club?", options: ["Juan Carlos Lorenzo", "Carlos Bianchi", "Miguel Ángel Russo", "Alfio Basile"], answer: 1 }, { q: "¿En qué año se fundó el club?", options: ["1901", "1905", "1910", "1915"], answer: 1 } ],
-                dificil: [ { q: "¿Cuántas Copas Intercontinentales ganó Boca?", options: ["1", "2", "3", "4"], answer: 2 }, { q: "¿Qué jugador tiene más presencias oficiales en la historia?", options: ["Hugo Gatti", "Roberto Mouzo", "Silvio Marzolini", "Juan Román Riquelme"], answer: 1 }, { q: "¿Cuántos partidos invicto alcanzó el equipo de Carlos Bianchi?", options: ["35", "38", "40", "43"], answer: 2 }, { q: "¿Cuántos goles oficiales hizo Martín Palermo en Boca?", options: ["210", "225", "236", "248"], answer: 2 } ],
-                socio: [ { q: "¿Cuál es la fecha exacta de fundación de Boca Juniors?", options: ["1 de enero de 1905", "3 de abril de 1905", "25 de mayo de 1905", "12 de octubre de 1905"], answer: 1 }, { q: "¿En qué año realizó Boca su histórica gira europea?", options: ["1920", "1925", "1930", "1935"], answer: 1 }, { q: "¿A quién le hizo el gol Martín Palermo con muletas en 2000?", options: ["Roberto Bonano", "Germán Burgos", "Amadeo Carrizo", "Franco Armani"], answer: 0 }, { q: "¿Qué barco inspiró los colores Azul y Oro?", options: ["Un barco español", "Un barco sueco", "Un barco inglés", "Un barco italiano"], answer: 1 } ]
+                medio: [ { q: "¿Cuántas Copas Libertadores tiene Boca?", options: ["4", "5", "6", "7"], answer: 2 }, { q: "¿Quién es el máximo goleador de la historia del club?", options: ["Martín Palermo", "Roberto Cherro", "Francisco Varallo", "Domingo Tarasconi"], answer: 0 }, { q: "¿Qué DT ganó más Copas Libertadores con el club?", options: ["Juan Carlos Lorenzo", "Carlos Bianchi", "Miguel Ángel Russo", "Alfio Basile"], answer: 1 }, { q: "¿En qué año se fundó el club?", options: ["1901", "1905", "1910", "1915"], answer: 1 }, { q: "¿Contra qué equipo ganó su primera Copa Libertadores?", options: ["Deportivo Cali", "América de Cali", "Palmeiras", "Peñarol"], answer: 0 } ],
+                dificil: [ { q: "¿Cuántas Copas Intercontinentales ganó Boca?", options: ["1", "2", "3", "4"], answer: 2 }, { q: "¿Qué jugador tiene más presencias oficiales en la historia?", options: ["Hugo Gatti", "Roberto Mouzo", "Silvio Marzolini", "Juan Román Riquelme"], answer: 1 }, { q: "¿Cuántos partidos invicto alcanzó el equipo de Carlos Bianchi?", options: ["35", "38", "40", "43"], answer: 2 }, { q: "¿Cuántos goles oficiales hizo Martín Palermo en Boca?", options: ["210", "225", "236", "248"], answer: 2 }, { q: "¿A qué equipo le ganó la Intercontinental 2003?", options: ["Bayern Munich", "Real Madrid", "Milan", "Ajax"], answer: 2 } ],
+                socio: [ { q: "¿Cuál es la fecha exacta de fundación de Boca Juniors?", options: ["1 de enero de 1905", "3 de abril de 1905", "25 de mayo de 1905", "12 de octubre de 1905"], answer: 1 }, { q: "¿En qué año realizó Boca su histórica gira europea?", options: ["1920", "1925", "1930", "1935"], answer: 1 }, { q: "¿A quién le hizo el gol Martín Palermo con muletas en 2000?", options: ["Roberto Bonano", "Germán Burgos", "Amadeo Carrizo", "Franco Armani"], answer: 0 }, { q: "¿Qué barco inspiró los colores Azul y Oro?", options: ["Un barco español", "Un barco sueco", "Un barco inglés", "Un barco italiano"], answer: 1 }, { q: "¿Quién fue el primer presidente de la historia de Boca?", options: ["Esteban Baglietto", "Juan B. Farenga", "Santiago Sana", "Alfredo Scarpati"], answer: 0 } ]
             },
             "Independiente": {
                 facil: [ { q: "¿Qué apodo histórico recibe el club por sus logros internacionales?", options: ["El Fortín", "El Rey de Copas", "La Academia", "El Ciclón"], answer: 1 }, { q: "¿Cómo se llama actualmente su estadio?", options: ["Doble Visera", "Libertadores de América", "El Cilindro", "La Bombonera"], answer: 1 }, { q: "¿De qué color es su camiseta titular?", options: ["Rojo", "Azul", "Blanco", "Celeste"], answer: 0 }, { q: "¿Cuál es su clásico rival de barrio?", options: ["San Lorenzo", "Boca Juniors", "River Plate", "Racing"], answer: 3 }, { q: "¿Qué jugador histórico utilizaba la camiseta número 10 en los 70s y 80s?", options: ["Diego Maradona", "Ricardo Bochini", "Sergio Agüero", "Daniel Bertoni"], answer: 1 } ],
@@ -730,22 +876,22 @@
                 socio: [ { q: "¿Cuál es la fecha de fundación oficial de Independiente?", options: ["1 de enero de 1905", "4 de agosto de 1904", "25 de mayo de 1903", "12 de octubre de 1905"], answer: 0 }, { q: "¿Qué color tenía la primera camiseta del club antes de adoptar el rojo?", options: ["Negro", "Blanca con escudo azul", "Verde", "A rayas amarillas y negras"], answer: 1 }, { q: "¿Qué equipo europeo inspiró el uso de la camiseta roja en 1908?", options: ["Manchester United", "Liverpool", "Nottingham Forest", "Arsenal"], answer: 2 }, { q: "¿Con cuántos puntos fue campeón Independiente en el Torneo Apertura 2002?", options: ["40", "43", "45", "47"], answer: 1 }, { q: "¿Cómo se llamaba la tienda donde trabajaban los jóvenes fundadores del club?", options: ["Gath & Chaves", "Tienda A la Ciudad de Londres", "Harrods", "Tienda Los Gallegos"], answer: 1 } ]
             },
             "Racing": {
-                facil: [ { q: "¿Cuál es el apodo principal del club?", options: ["El Ciclón", "El Millonario", "La Academia", "El Diablo"], answer: 2 }, { q: "¿Cómo se lo conoce popularmente a su estadio?", options: ["El Cilindro", "La Doble Visera", "El Fortín", "La Bombonera"], answer: 0 }, { q: "¿Cuál es su clásico rival histórico?", options: ["San Lorenzo", "Boca Juniors", "Independiente", "River Plate"], answer: 2 }, { q: "¿Cómo se llama el predio de entrenamiento de Racing?", options: ["Predio Tita Mattiussi", "Villa Olímpica", "Casa Amarilla", "River Camp"], answer: 0 } ],
-                medio: [ { q: "¿Por qué Racing es históricamente 'El Primer Grande'?", options: ["Por ser el primero en tener estadio", "Por el Heptacampeonato amateur", "Por ganar la primera Libertadores", "Por sus colores"], answer: 1 }, { q: "¿Qué título internacional único en Argentina ganó en 1967?", options: ["Primera Libertadores", "Primera Intercontinental", "Primera Sudamericana", "Primera Supercopa"], answer: 1 }, { q: "¿Quién fue el DT del equipo campeón de 2001?", options: ["Diego Simeone", "Eduardo Coudet", "Reinaldo 'Mostaza' Merlo", "Alfio Basile"], answer: 2 }, { q: "¿Qué frase popularizó su DT en el campeonato de 2001?", options: ["A lo Boca", "Paso a paso", "El equipo de José", "La guardia alta"], answer: 1 } ],
-                dificil: [ { q: "¿A qué equipo europeo venció en la Copa Intercontinental 1967?", options: ["Manchester United", "Real Madrid", "Celtic", "Benfica"], answer: 2 }, { q: "¿Qué jugador tiene el récord de presencias en Racing?", options: ["Gustavo Costas", "Natalio Perinetti", "Agustín Cejas", "Claudio Úbeda"], answer: 1 }, { q: "¿Quién es el máximo goleador de la historia del club?", options: ["Alberto Ohaco", "Juan José Pizzuti", "Evaristo Barrera", "Omar Corbatta"], answer: 0 }, { q: "¿Contra qué equipo jugó el partido que le dio el campeonato en 2001?", options: ["River Plate", "Vélez", "Boca Juniors", "San Lorenzo"], answer: 1 } ],
-                socio: [ { q: "¿Cuál es la fecha de fundación oficial de Racing?", options: ["25 de marzo de 1903", "1 de enero de 1905", "15 de agosto de 1904", "12 de octubre de 1903"], answer: 0 }, { q: "¿Cuál es el verdadero nombre de 'El Cilindro'?", options: ["Estadio Juan José Pizzuti", "Estadio Presidente Perón", "Estadio Ciudad de Avellaneda", "Estadio Academia"], answer: 1 }, { q: "¿Quién hizo el histórico gol contra el Celtic en Montevideo (1967)?", options: ["Humberto Maschio", "Alfio Basile", "Juan Carlos Cárdenas", "Roberto Perfumo"], answer: 2 }, { q: "¿De qué colores era la primera camiseta a cuadros de Racing?", options: ["Roja y Azul", "Celeste y Blanca", "Rosa y Celeste", "Negra y Amarilla"], answer: 2 } ]
+                facil: [ { q: "¿Cuál es el apodo principal del club?", options: ["El Ciclón", "El Millonario", "La Academia", "El Diablo"], answer: 2 }, { q: "¿Cómo se lo conoce popularmente a su estadio?", options: ["El Cilindro", "La Doble Visera", "El Fortín", "La Bombonera"], answer: 0 }, { q: "¿Cuál es su clásico rival histórico?", options: ["San Lorenzo", "Boca Juniors", "Independiente", "River Plate"], answer: 2 }, { q: "¿Cómo se llama el predio de entrenamiento de Racing?", options: ["Predio Tita Mattiussi", "Villa Olímpica", "Casa Amarilla", "River Camp"], answer: 0 }, { q: "¿En qué ciudad se encuentra el club?", options: ["Buenos Aires", "Avellaneda", "Rosario", "La Plata"], answer: 1 } ],
+                medio: [ { q: "¿Por qué Racing es históricamente 'El Primer Grande'?", options: ["Por ser el primero en tener estadio", "Por el Heptacampeonato amateur", "Por ganar la primera Libertadores", "Por sus colores"], answer: 1 }, { q: "¿Qué título internacional único en Argentina ganó en 1967?", options: ["Primera Libertadores", "Primera Intercontinental", "Primera Sudamericana", "Primera Supercopa"], answer: 1 }, { q: "¿Quién fue el DT del equipo campeón de 2001?", options: ["Diego Simeone", "Eduardo Coudet", "Reinaldo 'Mostaza' Merlo", "Alfio Basile"], answer: 2 }, { q: "¿Qué frase popularizó su DT en el campeonato de 2001?", options: ["A lo Boca", "Paso a paso", "El equipo de José", "La guardia alta"], answer: 1 }, { q: "¿Cuántos torneos consecutivos ganó en el recordado heptacampeonato amateur?", options: ["5", "6", "7", "8"], answer: 2 } ],
+                dificil: [ { q: "¿A qué equipo europeo venció en la Copa Intercontinental 1967?", options: ["Manchester United", "Real Madrid", "Celtic", "Benfica"], answer: 2 }, { q: "¿Qué jugador tiene el récord de presencias en Racing?", options: ["Gustavo Costas", "Natalio Perinetti", "Agustín Cejas", "Claudio Úbeda"], answer: 1 }, { q: "¿Quién es el máximo goleador de la historia del club?", options: ["Alberto Ohaco", "Juan José Pizzuti", "Evaristo Barrera", "Omar Corbatta"], answer: 0 }, { q: "¿Contra qué equipo jugó el partido que le dio el campeonato en 2001?", options: ["River Plate", "Vélez", "Boca Juniors", "San Lorenzo"], answer: 1 }, { q: "¿En qué año se inauguró el Estadio Presidente Perón?", options: ["1945", "1950", "1955", "1960"], answer: 1 } ],
+                socio: [ { q: "¿Cuál es la fecha de fundación oficial de Racing?", options: ["25 de marzo de 1903", "1 de enero de 1905", "15 de agosto de 1904", "12 de octubre de 1903"], answer: 0 }, { q: "¿Cuál es el verdadero nombre de 'El Cilindro'?", options: ["Estadio Juan José Pizzuti", "Estadio Presidente Perón", "Estadio Ciudad de Avellaneda", "Estadio Academia"], answer: 1 }, { q: "¿Quién hizo el histórico gol contra el Celtic en Montevideo (1967)?", options: ["Humberto Maschio", "Alfio Basile", "Juan Carlos Cárdenas", "Roberto Perfumo"], answer: 2 }, { q: "¿De qué colores era la primera camiseta a cuadros de Racing?", options: ["Roja y Azul", "Celeste y Blanca", "Rosa y Celeste", "Negra y Amarilla"], answer: 2 }, { q: "¿Quién fue el primer presidente institucional de Racing Club?", options: ["Arturo Giro", "Alejandro Carbone", "Pedro Werner", "Luis Carbone"], answer: 0 } ]
             },
             "San Lorenzo": {
-                facil: [ { q: "¿Cuál es el apodo más común de San Lorenzo?", options: ["El Ciclón", "El Fortín", "El Pincharrata", "El Canalla"], answer: 0 }, { q: "¿Cómo se llama su estadio actual?", options: ["El Palacio", "El Nuevo Gasómetro", "El José Amalfitani", "El Viaducto"], answer: 1 }, { q: "¿Cuál es su clásico rival de barrio?", options: ["Boca Juniors", "Vélez Sarsfield", "Huracán", "Ferro"], answer: 2 }, { q: "¿Qué Papa es hincha fanático y socio del club?", options: ["Juan Pablo II", "Benedicto XVI", "Francisco", "Pío XII"], answer: 2 } ],
-                medio: [ { q: "¿En qué año ganó su única Copa Libertadores de América?", options: ["2010", "2012", "2014", "2016"], answer: 2 }, { q: "¿Quién es el máximo goleador de la historia del club?", options: ["Héctor Scotta", "José Sanfilippo", "Bernardo Romeo", "Leandro Romagnoli"], answer: 1 }, { q: "¿Cómo se llamaba su histórico estadio de Avenida La Plata?", options: ["El Gasómetro", "La Doble Visera", "El Templo", "El Palacio"], answer: 0 }, { q: "¿En qué torneo logró el récord de ser el primer campeón invicto (1968)?", options: ["Torneo Nacional", "Torneo Metropolitano", "Campeonato de Primera", "Copa Argentina"], answer: 1 } ],
-                dificil: [ { q: "¿Quién hizo el gol de penal en la final de la Libertadores 2014?", options: ["Leandro Romagnoli", "Mauro Matos", "Néstor Ortigoza", "Julio Buffarini"], answer: 2 }, { q: "¿A qué equipo le ganó la final de la Copa Mercosur 2001?", options: ["Palmeiras", "Flamengo", "Corinthians", "Vasco da Gama"], answer: 1 }, { q: "¿Qué jugador tiene el récord de más partidos jugados en el club?", options: ["Roberto Telch", "Leandro Romagnoli", "Sergio Villar", "José Albrecht"], answer: 2 }, { q: "¿Cuántos goles hizo Héctor Scotta en el año 1975?", options: ["40", "50", "60", "70"], answer: 2 } ],
-                socio: [ { q: "¿Cuál es la fecha de fundación del club?", options: ["1 de abril de 1908", "25 de mayo de 1905", "1 de enero de 1910", "12 de octubre de 1908"], answer: 0 }, { q: "¿Quién fue el sacerdote que impulsó la fundación del club?", options: ["Padre Mario", "Padre Lorenzo Massa", "Padre Mugica", "Padre Bergoglio"], answer: 1 }, { q: "¿Cómo se lo conocía al brillante equipo de 1968?", options: ["La Máquina", "Los Matadores", "Los Carasucias", "Los Camboyanos"], answer: 1 }, { q: "¿En qué año se jugó el último partido en el Viejo Gasómetro?", options: ["1979", "1981", "1983", "1993"], answer: 0 } ]
+                facil: [ { q: "¿Cuál es el apodo más común de San Lorenzo?", options: ["El Ciclón", "El Fortín", "El Pincharrata", "El Canalla"], answer: 0 }, { q: "¿Cómo se llama su estadio actual?", options: ["El Palacio", "El Nuevo Gasómetro", "El José Amalfitani", "El Viaducto"], answer: 1 }, { q: "¿Cuál es su clásico rival de barrio?", options: ["Boca Juniors", "Vélez Sarsfield", "Huracán", "Ferro"], answer: 2 }, { q: "¿Qué Papa es hincha fanático y socio del club?", options: ["Juan Pablo II", "Benedicto XVI", "Francisco", "Pío XII"], answer: 2 }, { q: "¿De qué colores es la camiseta tradicional?", options: ["Azul y Grana", "Rojo y Blanco", "Celeste y Blanco", "Negro y Blanco"], answer: 0 } ],
+                medio: [ { q: "¿En qué año ganó su única Copa Libertadores de América?", options: ["2010", "2012", "2014", "2016"], answer: 2 }, { q: "¿Quién es el máximo goleador de la historia del club?", options: ["Héctor Scotta", "José Sanfilippo", "Bernardo Romeo", "Leandro Romagnoli"], answer: 1 }, { q: "¿Cómo se llamaba su histórico estadio de Avenida La Plata?", options: ["El Gasómetro", "La Doble Visera", "El Templo", "El Palacio"], answer: 0 }, { q: "¿En qué torneo logró el récord de ser el primer campeón invicto (1968)?", options: ["Torneo Nacional", "Torneo Metropolitano", "Campeonato de Primera", "Copa Argentina"], answer: 1 }, { q: "¿A qué equipo enfrentó en el Mundial de Clubes 2014?", options: ["Barcelona", "Real Madrid", "Bayern Munich", "Chelsea"], answer: 1 } ],
+                dificil: [ { q: "¿Quién hizo el gol de penal en la final de la Libertadores 2014?", options: ["Leandro Romagnoli", "Mauro Matos", "Néstor Ortigoza", "Julio Buffarini"], answer: 2 }, { q: "¿A qué equipo le ganó la final de la Copa Mercosur 2001?", options: ["Palmeiras", "Flamengo", "Corinthians", "Vasco da Gama"], answer: 1 }, { q: "¿Qué jugador tiene el récord de más partidos jugados en el club?", options: ["Roberto Telch", "Leandro Romagnoli", "Sergio Villar", "José Albrecht"], answer: 2 }, { q: "¿Cuántos goles hizo Héctor Scotta en el año 1975?", options: ["40", "50", "60", "70"], answer: 2 }, { q: "¿En qué año se fundó el club?", options: ["1905", "1908", "1910", "1912"], answer: 1 } ],
+                socio: [ { q: "¿Cuál es la fecha de fundación del club?", options: ["1 de abril de 1908", "25 de mayo de 1905", "1 de enero de 1910", "12 de octubre de 1908"], answer: 0 }, { q: "¿Quién fue el sacerdote que impulsó la fundación del club?", options: ["Padre Mario", "Padre Lorenzo Massa", "Padre Mugica", "Padre Bergoglio"], answer: 1 }, { q: "¿Cómo se lo conocía al brillante equipo de 1968?", options: ["La Máquina", "Los Matadores", "Los Carasucias", "Los Camboyanos"], answer: 1 }, { q: "¿En qué año se jugó el último partido en el Viejo Gasómetro?", options: ["1979", "1981", "1983", "1993"], answer: 0 }, { q: "¿Cuál fue el resultado de la final de la Libertadores 2014 contra Nacional?", options: ["1-0 global", "2-1 global", "3-2 global", "3-0 global"], answer: 0 } ]
             },
             "Huracán": {
                 facil: [ { q: "¿Cuál es el apodo principal del club?", options: ["El Ciclón", "El Globo / Quemeros", "El Fortín", "Los Bichos"], answer: 1 }, { q: "¿Cómo se llama el estadio de Huracán?", options: ["José Amalfitani", "Nuevo Gasómetro", "Tomás Adolfo Ducó", "Diego A. Maradona"], answer: 2 }, { q: "¿Cuáles son sus colores tradicionales?", options: ["Rojo y Blanco", "Blanco y Granate", "Blanco y Rojo", "Blanco con vivo Rojo"], answer: 2 }, { q: "¿Cuál es su clásico rival?", options: ["San Lorenzo", "Vélez Sarsfield", "Boca Juniors", "Argentinos Juniors"], answer: 0 }, { q: "¿A qué histórico barrio porteño pertenece?", options: ["Boedo", "Parque Patricios", "La Paternal", "Mataderos"], answer: 1 } ],
-                medio: [ { q: "¿En qué año Huracán salió Campeón del emblemático Torneo Metropolitano?", options: ["1967", "1973", "1978", "1981"], answer: 1 }, { q: "¿Quién fue el DT de ese histórico equipo campeón?", options: ["César Luis Menotti", "Ángel Cappa", "Carlos Babington", "Alfio Basile"], answer: 0 }, { q: "¿Qué copa nacional conquistó en el año 2014?", options: ["Copa Argentina", "Copa de la Liga", "Supercopa Argentina", "Copa Centenario"], answer: 0 }, { q: "¿Qué jugador histórico es considerado el mayor ídolo y símbolo del club?", options: ["René Houseman", "Herminio Masantonio", "Miguel Brindisi", "Javier Pastore"], answer: 1 } ],
-                dificil: [ { q: "¿Quién es el máximo goleador histórico de Huracán?", options: ["Emilio Baldonedo", "René Houseman", "Herminio Masantonio", "Tomás Ducó"], answer: 2 }, { q: "¿A qué equipo venció en la final de la Copa Argentina 2014?", options: ["River Plate", "Boca Juniors", "Rosario Central", "San Lorenzo"], answer: 2 }, { q: "¿A qué instancia internacional máxima llegó en la Copa Sudamericana 2015?", options: ["Semifinales", "Final", "Cuartos de final", "Campeón"], answer: 1 }, { q: "¿Qué jugador histórico tiene el récord de mayor cantidad de presencias en el club?", options: ["Jorge Alberti", "Miguel Brindisi", "Carlos Babington", "Roque Avallay"], answer: 0 } ],
-                socio: [ { q: "¿En qué año se fundó oficialmente el Club Atlético Huracán?", options: ["1 de enero de 1908", "1 de noviembre de 1908", "25 de mayo de 1905", "12 de octubre de 1908"], answer: 1 }, { q: "¿De quién tomó su nombre el club 'Huracán'?", options: ["Un viento fuerte de la zona", "El globo aerostático de Jorge Newbery", "Un barco", "Una tienda de Parque Patricios"], answer: 1 }, { q: "¿Qué cargo ocupó el histórico Tomás Adolfo Ducó además de jugador?", options: ["Sacerdote", "Presidente del Club y Militar", "Gobernador", "Médico"], answer: 1 }, { q: "¿Cuántos títulos de Primera División en la era Amateur posee Huracán?", options: ["2", "3", "4", "5"], answer: 2 } ]
+                medio: [ { q: "¿En qué año Huracán salió Campeón del emblemático Torneo Metropolitano?", options: ["1967", "1973", "1978", "1981"], answer: 1 }, { q: "¿Quién fue el DT de ese histórico equipo campeón?", options: ["César Luis Menotti", "Ángel Cappa", "Carlos Babington", "Alfio Basile"], answer: 0 }, { q: "¿Qué copa nacional conquistó en el año 2014?", options: ["Copa Argentina", "Copa de la Liga", "Supercopa Argentina", "Copa Centenario"], answer: 0 }, { q: "¿Qué jugador histórico es considerado el mayor ídolo y símbolo del club?", options: ["René Houseman", "Herminio Masantonio", "Miguel Brindisi", "Javier Pastore"], answer: 1 }, { q: "¿Quién fue el arquero figura del Huracán campeón de 1973?", options: ["Héctor Roganti", "Nery Pumpido", "Ubaldo Fillol", "Carlos Gatti"], answer: 0 } ],
+                dificil: [ { q: "¿Quién es el máximo goleador histórico de Huracán?", options: ["Emilio Baldonedo", "René Houseman", "Herminio Masantonio", "Tomás Ducó"], answer: 2 }, { q: "¿A qué equipo venció en la final de la Copa Argentina 2014?", options: ["River Plate", "Boca Juniors", "Rosario Central", "San Lorenzo"], answer: 2 }, { q: "¿A qué instancia internacional máxima llegó en la Copa Sudamericana 2015?", options: ["Semifinales", "Final", "Cuartos de final", "Campeón"], answer: 1 }, { q: "¿Qué jugador histórico tiene el récord de mayor cantidad de presencias en el club?", options: ["Jorge Alberti", "Miguel Brindisi", "Carlos Babington", "Roque Avallay"], answer: 0 }, { q: "¿En qué año descendió por última vez a la B Nacional antes de retornar?", options: ["2003", "2007", "2011", "2013"], answer: 2 } ],
+                socio: [ { q: "¿En qué año se fundó oficialmente el Club Atlético Huracán?", options: ["1 de enero de 1908", "1 de noviembre de 1908", "25 de mayo de 1905", "12 de octubre de 1908"], answer: 1 }, { q: "¿De quién tomó su nombre el club 'Huracán'?", options: ["Un viento fuerte de la zona", "El globo aerostático de Jorge Newbery", "Un barco", "Una tienda de Parque Patricios"], answer: 1 }, { q: "¿Qué cargo ocupó el histórico Tomás Adolfo Ducó además de jugador?", options: ["Sacerdote", "Presidente del Club y Militar", "Gobernador", "Médico"], answer: 1 }, { q: "¿Cuántos títulos de Primera División en la era Amateur posee Huracán?", options: ["2", "3", "4", "5"], answer: 2 }, { q: "¿Cuál fue el primer presidente de la historia del club?", options: ["José Wuille Bille", "Tomás Ducó", "Jorge Newbery", "Lorenzo Mazzucco"], answer: 0 } ]
             }
         };
 
@@ -787,6 +933,7 @@
             correctAnswers = 0;
             isChicana = false;
             chicanaAprobada = false;
+            feHinchaUsed = false; 
             
             document.getElementById('final-action-btn').style.display = 'none';
             document.getElementById('fe-hincha-btn').style.display = 'none';
@@ -807,10 +954,10 @@
         }
 
         function restartFromCurrentLevel() {
+            feHinchaUsed = true; 
             const selectedClub = clubs[currentClubIndex];
             const currentDifficulty = levels[currentLevelIndex];
             
-            // Recargamos las preguntas de este nivel para no quedarnos sin stock tras morir
             availableQuestions[currentDifficulty] = [...database[selectedClub][currentDifficulty]];
             
             correctAnswers = 0;
@@ -822,8 +969,6 @@
             document.getElementById('options-container').style.display = 'flex';
             document.getElementById('status-container').style.opacity = '1';
             
-            // El timer no se resetea a 0. Sigue corriendo para mantener el tiempo global gastado.
-            // Solo reactivamos el intervalo que se frenó al perder.
             timerInterval = setInterval(() => {
                 gameTimer++;
                 document.getElementById('main-timer').innerText = formatTime(gameTimer);
@@ -844,7 +989,6 @@
             const selectedClub = clubs[currentClubIndex];
             const gameScreen = document.getElementById('game-screen');
             
-            // La Chicana aparece justo al iniciar "Socio" y antes de aprobarse
             if (currentDifficulty === 'socio' && !chicanaAprobada) {
                 isChicana = true;
                 currentQuestionObj = chicanas[selectedClub];
@@ -951,7 +1095,13 @@
             clearInterval(timerInterval);
             const clubName = clubs[currentClubIndex];
             document.getElementById('game-screen').classList.remove('chicana-dark-mode');
-            document.getElementById('question-text').innerText = `Usted no es un verdadero fanático de ${clubName}...`;
+            
+            if (feHinchaUsed) {
+                document.getElementById('question-text').innerText = `Decepcionaste a los hinchas que confiaban en vos, ${currentPlayer}.`;
+            } else {
+                document.getElementById('question-text').innerText = `Usted no es un verdadero fanático de ${clubName}...`;
+            }
+
             document.getElementById('options-container').style.display = 'none';
             document.getElementById('status-container').style.opacity = '0'; 
             
@@ -960,9 +1110,8 @@
             actionBtn.onclick = startGame;
             actionBtn.style.display = 'block';
 
-            // Muestra botón "La fe del hincha" solo en Difícil (2) o Socio (3)
             const feBtn = document.getElementById('fe-hincha-btn');
-            if (currentLevelIndex >= 2) { 
+            if (currentLevelIndex >= 2 && !feHinchaUsed) { 
                 feBtn.style.display = 'block';
             } else {
                 feBtn.style.display = 'none';
@@ -972,17 +1121,15 @@
         }
 
         function showWinScreen() {
-            clearInterval(timerInterval); // Cortamos el timer definitivo.
+            clearInterval(timerInterval);
             const clubName = clubs[currentClubIndex];
             document.getElementById('game-screen').classList.remove('chicana-dark-mode');
             document.getElementById('question-text').innerText = `¡Usted es un socio de ${clubName} con todas las letras!\nTiempo: ${formatTime(gameTimer)}`;
             document.getElementById('options-container').style.display = 'none';
             document.getElementById('status-container').style.opacity = '0'; 
             
-            let playerName = prompt("¡Felicidades! Ingresá tu nombre para la tabla de posiciones:") || "Socio Anónimo";
-            
-            // Pusheamos con el tiempo real de la partida finalizada
-            leaderboardData.push({ name: playerName, club: clubName, time: gameTimer });
+            leaderboardData.push({ name: currentPlayer, club: clubName, time: gameTimer });
+            localStorage.setItem('vf_leaderboard', JSON.stringify(leaderboardData));
 
             const actionBtn = document.getElementById('final-action-btn');
             actionBtn.innerText = "Obtener reconocimiento";
@@ -1039,6 +1186,7 @@
             setTimeout(() => {
                 flyingCard.remove();
                 unlockedClubs[clubs[currentClubIndex]] = true; 
+                localStorage.setItem('vf_unlocked', JSON.stringify(unlockedClubs));
                 renderVitrina(); 
                 switchScreen('vitrina-screen', document.getElementById('nav-vitrina')); 
             }, 1300); 
