@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verdadero Fanatico</title>
+    <style>
+        /* === ESTILOS GLOBALES === */
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Sistema de Vistas (Pantallas) */
+        .screen {
+            display: none;
+            flex-direction: column;
+            flex-grow: 1;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            transition: background 0.5s ease;
+            box-shadow: inset 0 0 200px rgba(0,0,0,0.95);
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* === BARRA SUPERIOR (HEADER) === */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            box-sizing: border-box;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-toggle {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 30px;
+            height: 16px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .menu-toggle span {
+            display: block;
+            height: 2.5px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 5px;
+            pointer-events: none;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+
+        .logo-decoration {
+            width: 50px;
+            height: 50px;
+            border: 2px dashed #ffffff;
+            border-radius: 50%;
+            margin: 0 0 0 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+            text-align: center;
+            box-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+            cursor: default;
+        }
+
+        .timer-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px #000;
+            display: none;
+        }
+
+        /* === FONDOS PERSONALIZADOS POR EQUIPO === */
+        .bg-river { background: linear-gradient(135deg, #000000 45%, #cc0000 45%, #cc0000 55%, #000000 55%); }
+        .bg-boca { background: linear-gradient(to bottom, #001a4d 35%, #a68a00 35%, #a68a00 55%, #001a4d 55%); }
+        .bg-independiente {
+            background-color: #660000;
+            background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M30 10 h40 v8 h-40 z M35 18 h30 v30 c0 20 -15 25 -15 25 s -15 -5 -15 -25 z M25 18 c -12 0 -12 22 0 22 M75 18 c 12 0 12 22 0 22 M20 85 l 10 -15 h 40 l 10 15 v 5 h-60 z" fill="rgba(0,0,0,0.15)" stroke="none"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 60vh;
+        }
+        .bg-racing { background-color: #00132b; }
+        .bg-racing::before, .bg-racing::after {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 14px;
+            background: repeating-linear-gradient(to right, #66b3ff, #66b3ff 2px, transparent 2px, transparent 6px);
+            opacity: 0.5;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .bg-racing::before { left: 20px; }
+        .bg-racing::after { right: 20px; }
+
+        .bg-sanlorenzo { background: repeating-linear-gradient(90deg, #001333, #001333 60px, #4d0000 60px, #4d0000 120px); }
+
+        .bg-huracan { background-color: #ffffff; }
+        .bg-huracan::before, .bg-huracan::after {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 8px;
+            background-color: #a81c1c; 
+            z-index: 1;
+        }
+        .bg-huracan::before { left: 10px; }
+        .bg-huracan::after { right: 10px; }
+        .bg-huracan .question { color: #ffffff; text-shadow: 2px 2px 8px #000000, -1px -1px 4px #000000; }
+        .bg-huracan .option-btn { background-color: rgba(0, 0, 0, 0.85); color: #ffffff; }
+
+        /* Dinámica Chicana (Fondo oscurecido) */
+        .chicana-dark-mode::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.75);
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* === MENÚ LATERAL (ASIDE) === */
+        aside.sidebar {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 270px;
+            height: 100vh;
+            background-color: #0a0a0a;
+            border-right: 2px solid #001f4d;
+            transition: left 0.3s ease-in-out;
+            z-index: 200;
+            padding: 20px;
+            box-sizing: border-box;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        aside.sidebar.open { left: 0; }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #aaaaaa;
+            font-size: 2.5rem;
+            cursor: pointer;
+            align-self: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Botones Ovalados del Menú */
+        .sidebar-nav button {
+            background: transparent;
+            border: 2px solid #333;
+            color: #fff;
+            padding: 15px 25px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            text-align: center;
+            border-radius: 50px; /* Vuelve ovalados los botones */
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-nav button:hover {
+            background: #1a1a1a;
+        }
+
+        /* Clase activa para el botón seleccionado */
+        .sidebar-nav button.active-nav {
+            background-color: #1a1a1a;
+            border-color: #ffffff;
+            transform: scale(1.05); /* Agranda mínimamente */
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8); /* Oscurece el interior */
+        }
+
+        /* === PANTALLA: MENÚ PRINCIPAL === */
+        #menu-screen {
+            background-color: #000000;
+            justify-content: center;
+            align-items: center;
+            box-shadow: none; 
+        }
+
+        .carousel-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 900px;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .carousel-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 3.5rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            padding: 0 40px;
+            z-index: 10;
+        }
+        
+        .carousel-btn:hover { transform: scale(1.2); }
+
+        .carousel-track {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            position: relative;
+            height: 100px;
+            overflow: hidden;
+        }
+
+        .team-center {
+            font-size: 2.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 5px #000;
+            white-space: nowrap;
+            z-index: 5;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .team-side {
+            position: absolute;
+            font-size: 1.4rem;
+            color: #777;
+            text-transform: uppercase;
+            white-space: nowrap;
+            opacity: 0.6;
+            transition: all 0.4s ease;
+        }
+
+        .left-side {
+            left: -10px;
+            -webkit-mask-image: linear-gradient(to right, transparent 10%, black 100%);
+            mask-image: linear-gradient(to right, transparent 10%, black 100%);
+        }
+
+        .right-side {
+            right: -10px;
+            -webkit-mask-image: linear-gradient(to left, transparent 10%, black 100%);
+            mask-image: linear-gradient(to left, transparent 10%, black 100%);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .pop-anim { animation: popIn 0.4s forwards; }
+
+        /* === PANTALLAS: VITRINA Y POSICIONES === */
+        #vitrina-screen, #leaderboard-screen {
+            background-color: #4a0000; 
+            padding: 100px 40px 40px 40px;
+            overflow-y: auto;
+        }
+
+        .screen-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        .vitrina-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .socio-card {
+            width: 150px;
+            height: 90px;
+            border: 3px solid #ffffff;
+            border-radius: 8px;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(0,0,0,0.5);
+            transition: all 0.5s ease;
+            opacity: 0.2; 
+            filter: grayscale(100%);
+        }
+
+        .socio-card.unlocked {
+            opacity: 1;
+            filter: grayscale(0%);
+            background: rgba(255,255,255,0.15);
+            box-shadow: 0 0 15px rgba(255,255,255,0.3);
+        }
+
+        .card-photo { width: 35px; height: 45px; background-color: #ffffff; border-radius: 4px; }
+        .card-lines { display: flex; flex-direction: column; gap: 6px; flex-grow: 1; }
+        .card-line { height: 4px; background-color: #ffffff; border-radius: 2px; }
+        .card-line.short { width: 60%; }
+        .card-desc { font-size: 0.9rem; text-align: center; color: #cccccc; text-shadow: 1px 1px 2px #000; }
+
+        .leaderboard-table {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background: rgba(0,0,0,0.6);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #666;
+        }
+
+        .leaderboard-table th { background-color: #000; color: #fff; text-transform: uppercase; font-size: 1.1rem; }
+        .leaderboard-table tr:last-child td { border-bottom: none; }
+        .leaderboard-table tr:hover { background-color: rgba(255,255,255,0.1); }
+
+        /* === PANTALLA: JUEGO === */
+        #game-screen {
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #game-screen section { z-index: 10; width: 100%; }
+
+        .question {
+            font-size: 1.8rem;
+            margin: 0 auto 30px auto;
+            max-width: 800px;
+            min-height: 60px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9); 
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        .option-btn {
+            background-color: rgba(0, 0, 0, 0.7); 
+            color: #ffffff;
+            border: 3px solid #ffffff;
+            border-radius: 100px; 
+            padding: 15px 30px; 
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+            width: 100%;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        .option-btn:hover:not(:disabled) { background-color: rgba(255, 255, 255, 0.2); }
+        .option-btn:active:not(:disabled) { transform: scale(0.98); }
+
+        .action-btn {
+            background-color: #ffffff;
+            color: #000000;
+            border: 3px solid #000000;
+            border-radius: 50px;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px auto 0;
+            display: none; 
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .action-btn:hover { background-color: #cccccc; }
+
+        .btn-inverted {
+            background-color: #000000;
+            color: #ffffff;
+            border: 2px solid #ffffff;
+            font-size: 1rem;
+            padding: 10px 25px;
+        }
+
+        .btn-inverted:hover { background-color: #333333; }
+
+        /* === PIE DE PÁGINA (FOOTER) === */
+        footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            box-sizing: border-box;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .author-info { color: rgba(150, 150, 150, 0.5); font-size: 0.85rem; margin: 0; }
+
+        .ad-block {
+            position: absolute;
+            bottom: 20px; 
+            left: 50%;
+            transform: translateX(-50%); 
+            width: 320px;
+            height: 40px;
+            background-color: rgba(10, 10, 10, 0.9);
+            border: 1px solid #1a1a1a;
+            color: #666666;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            pointer-events: auto;
+        }
+
+        .status-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            transition: opacity 0.3s;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        .level-title { font-size: 0.9rem; color: #cccccc; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 1px; }
+        .counter { font-size: 2rem; font-weight: bold; color: #ffffff; }
+
+        /* === RESPONSIVE (CELULARES) === */
+        @media (max-width: 768px) {
+            header { padding: 15px; }
+            .timer-display { font-size: 1.2rem; }
+            
+            .carousel-btn { font-size: 2.5rem; padding: 0 15px; }
+            .team-center { font-size: 1.8rem; }
+            .team-side { font-size: 1rem; }
+            .left-side { left: 0px; }
+            .right-side { right: 0px; }
+            
+            .vitrina-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            .screen-title { font-size: 1.8rem; margin-bottom: 25px; }
+            
+            #vitrina-screen, #leaderboard-screen { padding: 80px 20px 20px 20px; }
+            
+            .leaderboard-table th, .leaderboard-table td { padding: 10px 5px; font-size: 0.9rem; }
+            
+            .question { font-size: 1.3rem; margin-bottom: 20px; }
+            .option-btn { font-size: 1rem; padding: 12px 20px; }
+            .action-btn { font-size: 1rem; padding: 12px 20px; }
+            
+            footer { padding: 0 15px; height: 60px; }
+            .ad-block { width: 150px; font-size: 0.6rem; bottom: 10px; }
+            .author-info { font-size: 0.7rem; }
+            .counter { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <button class="menu-toggle" id="menu-toggle-btn" onclick="toggleSidebar()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <figure class="logo-decoration">Logo</figure>
+        </div>
+        <div class="timer-display" id="main-timer">00:00</div>
+    </header>
+
+    <aside class="sidebar" id="sidebar">
+        <button class="close-btn" onclick="toggleSidebar()">&times;</button>
+        <nav class="sidebar-nav">
+            <button id="nav-inicio" class="active-nav" onclick="switchScreen('menu-screen', this); toggleSidebar();">Inicio</button>
+            <button id="nav-vitrina" onclick="switchScreen('vitrina-screen', this); toggleSidebar();">Vitrina</button>
+            <button id="nav-posiciones" onclick="switchScreen('leaderboard-screen', this); toggleSidebar(); renderLeaderboard();">Posiciones</button>
+        </nav>
+    </aside>
+
+    <main id="menu-screen" class="screen active">
+        <div class="carousel-wrapper">
+            <button class="carousel-btn" onclick="prevClub()">&#10094;</button>
+            <div class="carousel-track">
+                <div class="team-side left-side" id="prev-team">Huracán</div>
+                <div class="team-center pop-anim" id="team-name">River Plate</div>
+                <div class="team-side right-side" id="next-team">Boca Juniors</div>
+            </div>
+            <button class="carousel-btn" onclick="nextClub()">&#10095;</button>
+        </div>
+        <button class="action-btn" style="display: block; position: relative; z-index: 10;" onclick="startGame()">¡Quiero ser socio!</button>
+    </main>
+
+    <main id="vitrina-screen" class="screen">
+        <h1 class="screen-title">Tu Vitrina de Socios</h1>
+        <div class="vitrina-grid" id="vitrina-grid">
+            </div>
+    </main>
+
+    <main id="leaderboard-screen" class="screen">
+        <h1 class="screen-title">Tabla de Posiciones</h1>
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>N°</th>
+                    <th>Nombre</th>
+                    <th>Club</th>
+                    <th>Tiempo</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                </tbody>
+        </table>
+    </main>
+
+    <main id="game-screen" class="screen">
+        <section aria-labelledby="question-text">
+            <p class="question" id="question-text">Cargando pregunta...</p>
+            
+            <div class="options-list" id="options-container">
+                <button class="option-btn" onclick="checkAnswer(0)" id="btn-0">Opción 1</button>
+                <button class="option-btn" onclick="checkAnswer(1)" id="btn-1">Opción 2</button>
+                <button class="option-btn" onclick="checkAnswer(2)" id="btn-2">Opción 3</button>
+                <button class="option-btn" onclick="checkAnswer(3)" id="btn-3">Opción 4</button>
+            </div>
+
+            <button id="final-action-btn" class="action-btn"></button>
+            <button id="fe-hincha-btn" class="action-btn" style="background-color: #ffd700; color: #000; border-color: #ccaa00;" onclick="restartFromCurrentLevel()">La fe del hincha...</button>
+            <button id="back-menu-btn" class="action-btn btn-inverted" onclick="switchScreen('menu-screen', document.getElementById('nav-inicio'))">Volver al menú</button>
+        </section>
+    </main>
+
+    <footer>
+        <p class="author-info">Creado por: Yair Carrizo</p>
+        <div class="ad-block">Espacio Publicitario</div>
+        <div class="status-container" id="status-container" style="opacity: 0;">
+            <span class="level-title" id="level-title">Nivel: Fácil</span>
+            <div class="counter" id="counter-text">0/5</div>
+        </div>
+    </footer>
+
+    <script>
+        // === GESTIÓN DE CLUBES ===
+        const clubs = ["River Plate", "Boca Juniors", "Independiente", "Racing", "San Lorenzo", "Huracán"];
+        let currentClubIndex = 0;
+        let unlockedClubs = {
+            "River Plate": false, "Boca Juniors": false, "Independiente": false,
+            "Racing": false, "San Lorenzo": false, "Huracán": false
+        };
+        let leaderboardData = [];
+        let gameTimer = 0;
+        let timerInterval;
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function renderVitrina() {
+            const grid = document.getElementById('vitrina-grid');
+            grid.innerHTML = '';
+            clubs.forEach(club => {
+                const isUnlocked = unlockedClubs[club];
+                grid.innerHTML += `
+                    <div class="card-wrapper">
+                        <div class="socio-card ${isUnlocked ? 'unlocked' : ''}">
+                            <div class="card-photo"></div>
+                            <div class="card-lines">
+                                <div class="card-line"></div>
+                                <div class="card-line"></div>
+                                <div class="card-line short"></div>
+                            </div>
+                        </div>
+                        <p class="card-desc">Socio de ${club}</p>
+                    </div>
+                `;
+            });
+        }
+        renderVitrina();
+
+        function renderLeaderboard() {
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = '';
+            const sortedData = [...leaderboardData].sort((a, b) => a.time - b.time);
+            sortedData.forEach((entry, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${entry.name}</td>
+                        <td>${entry.club}</td>
+                        <td>${formatTime(entry.time)}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // === NAVEGACIÓN ===
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+        function switchScreen(screenId, btnElement) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            
+            // Actualiza estilos visuales del menú lateral (Ovalados)
+            if(btnElement) {
+                document.querySelectorAll('.sidebar-nav button').forEach(b => b.classList.remove('active-nav'));
+                btnElement.classList.add('active-nav');
+            }
+
+            document.getElementById('status-container').style.opacity = (screenId === 'game-screen') ? '1' : '0';
+            document.getElementById('main-timer').style.display = (screenId === 'game-screen') ? 'block' : 'none';
+            
+            if(screenId !== 'game-screen') clearInterval(timerInterval);
+        }
+
+        function updateCarousel() {
+            const prevIndex = (currentClubIndex - 1 + clubs.length) % clubs.length;
+            const nextIndex = (currentClubIndex + 1) % clubs.length;
+            document.getElementById('prev-team').innerText = clubs[prevIndex];
+            document.getElementById('next-team').innerText = clubs[nextIndex];
+            
+            const centerTeam = document.getElementById('team-name');
+            centerTeam.innerText = clubs[currentClubIndex];
+            
+            centerTeam.classList.remove('pop-anim');
+            void centerTeam.offsetWidth; 
+            centerTeam.classList.add('pop-anim');
+        }
+
+        function nextClub() { currentClubIndex = (currentClubIndex + 1) % clubs.length; updateCarousel(); }
+        function prevClub() { currentClubIndex = (currentClubIndex - 1 + clubs.length) % clubs.length; updateCarousel(); }
+
+        // === PREGUNTAS CHICANAS AL PROPIO CLUB ===
+        const chicanas = {
+            "River Plate": { q: "Pregunta chicana:\n¿Qué famoso 'fantasma' de una sola letra persiguió al club tras su peor momento histórico?", options: ["El fantasma de la A", "El fantasma de la B", "El fantasma de la C", "El fantasma de Madrid"], answer: 1 },
+            "Boca Juniors": { q: "Pregunta chicana:\n¿En qué histórico partido del año 2018 el equipo 'murió' futbolísticamente en Europa?", options: ["Final Intercontinental 2000", "Final Libertadores 9/12/2018", "Octavos Libertadores 2015", "Supercopa Argentina 2018"], answer: 1 },
+            "Independiente": { q: "Pregunta chicana:\n¿Qué apodo despectivo le suelen decir sus rivales por la supuesta 'falta de aliento' y años de sequía local?", options: ["Los Amargos", "Los Pingüinos", "Los Mufas", "Los Llorones"], answer: 0 },
+            "Racing": { q: "Pregunta chicana:\n¿Cómo le decían despectivamente al club durante el gerenciamiento que lo salvó de la quiebra en 1999?", options: ["Blanquiceleste S.A. / Empresa", "Racing Club S.A.", "La Academia S.A.", "Sin Barrio"], answer: 0 },
+            "San Lorenzo": { q: "Pregunta chicana:\n¿Qué club es objeto constante de burla por ser considerado 'sin barrio' y terminar con un hipermercado?", options: ["Vélez", "Huracán", "Ferro", "San Lorenzo"], answer: 3 },
+            "Huracán": { q: "Pregunta chicana:\n¿Cuántas veces descendió a la B el autodenominado 'Sexto Grande'?", options: ["1 vez", "2 veces", "3 veces", "4 veces"], answer: 3 }
+        };
+
+        // === BASE DE DATOS ===
+        const database = {
+            "River Plate": {
+                facil: [ { q: "¿En qué estadio juega de local River Plate?", options: ["La Bombonera", "El Monumental", "El Cilindro", "El Nuevo Gasómetro"], answer: 1 }, { q: "¿Cuáles son los colores históricos de la camiseta titular?", options: ["Blanco y Negro", "Rojo y Negro", "Blanco y Rojo", "Azul y Amarillo"], answer: 2 }, { q: "¿En qué año se fundó el club?", options: ["1905", "1910", "1901", "1899"], answer: 2 }, { q: "¿Qué apodo recibe popularmente el club?", options: ["El Rey de Copas", "El Millonario", "La Academia", "El Fortín"], answer: 1 }, { q: "¿Qué clásico rival histórico tiene River Plate?", options: ["Independiente", "Racing", "Boca Juniors", "San Lorenzo"], answer: 2 } ],
+                medio: [ { q: "¿Cuántas Copas Libertadores tiene River Plate?", options: ["3", "4", "5", "7"], answer: 1 }, { q: "¿Quién es el máximo goleador histórico de River?", options: ["Ángel Labruna", "Enzo Francescoli", "Fernando Cavenaghi", "Bernabé Ferreyra"], answer: 0 }, { q: "¿A qué equipo le ganó la final de la Copa Libertadores 2018?", options: ["Tigres", "Flamengo", "Boca Juniors", "Gremio"], answer: 2 }, { q: "¿Qué jugador anotó el tercer gol en Madrid en 2018?", options: ["Lucas Pratto", "Juan F. Quintero", "Gonzalo Martínez", "Ignacio Scocco"], answer: 2 }, { q: "¿Quién era el DT en la Copa Libertadores 1986?", options: ["Ramón Díaz", "Marcelo Gallardo", "Américo Gallego", "Hector Veira"], answer: 3 } ],
+                dificil: [ { q: "¿Qué jugador tiene más presencias oficiales en la historia del club?", options: ["Amadeo Carrizo", "Reinaldo Merlo", "Norberto Alonso", "Ángel Labruna"], answer: 1 }, { q: "¿En qué año ganó River su única Copa Intercontinental?", options: ["1986", "1996", "1978", "1982"], answer: 0 }, { q: "¿A qué equipo europeo venció en la final Intercontinental?", options: ["Juventus", "Steaua de Bucarest", "Milan", "Real Madrid"], answer: 1 }, { q: "¿Cómo se llamaba la famosa delantera de la década del 40?", options: ["La Máquina", "La Maquinita", "Los Carasucias", "El Ballet"], answer: 0 }, { q: "¿Quién es el jugador con más títulos en la historia de River?", options: ["Ángel Labruna", "Leonardo Ponzio", "Jonatan Maidana", "Marcelo Gallardo"], answer: 1 } ],
+                socio: [ { q: "¿Quién fue el primer presidente de la historia del club?", options: ["Antonio Vespucio", "Leopoldo Bard", "Carlos Peucelle", "Hugo Santilli"], answer: 1 }, { q: "¿Cuántos goles hizo Bernabé Ferreyra en River?", options: ["105", "150", "187", "201"], answer: 2 }, { q: "¿Qué día exacto se inauguró el Estadio Monumental?", options: ["25/05/1938", "26/05/1938", "01/01/1939", "28/09/1937"], answer: 1 }, { q: "¿Cómo se llamaba el viejo estadio de River?", options: ["La Herradura", "Alvear y Tagle", "El Palacio", "Templo de Núñez"], answer: 1 }, { q: "¿Qué jugador extranjero hizo más goles en el club?", options: ["Marcelo Salas", "Radamel Falcao", "Juan Pablo Ángel", "Enzo Francescoli"], answer: 3 } ]
+            },
+            "Boca Juniors": {
+                facil: [ { q: "¿Qué apodo recibe el hincha de Boca?", options: ["Millonario", "Xeneize", "Cuervo", "Leproso"], answer: 1 }, { q: "¿En qué estadio juega de local?", options: ["El Monumental", "La Bombonera", "El Cilindro", "José Amalfitani"], answer: 1 }, { q: "¿Cuáles son sus colores tradicionales?", options: ["Rojo y Blanco", "Azul y Oro", "Celeste y Blanco", "Rojo y Negro"], answer: 1 }, { q: "¿Cuál es su clásico rival?", options: ["Independiente", "San Lorenzo", "Racing", "River Plate"], answer: 3 }, { q: "¿En qué barrio está ubicado su estadio?", options: ["La Boca", "Avellaneda", "Boedo", "Núñez"], answer: 0 } ],
+                medio: [ { q: "¿Cuántas Copas Libertadores tiene Boca?", options: ["4", "5", "6", "7"], answer: 2 }, { q: "¿Quién es el máximo goleador de la historia del club?", options: ["Martín Palermo", "Roberto Cherro", "Francisco Varallo", "Domingo Tarasconi"], answer: 0 }, { q: "¿Qué DT ganó más Copas Libertadores con el club?", options: ["Juan Carlos Lorenzo", "Carlos Bianchi", "Miguel Ángel Russo", "Alfio Basile"], answer: 1 }, { q: "¿En qué año se fundó el club?", options: ["1901", "1905", "1910", "1915"], answer: 1 } ],
+                dificil: [ { q: "¿Cuántas Copas Intercontinentales ganó Boca?", options: ["1", "2", "3", "4"], answer: 2 }, { q: "¿Qué jugador tiene más presencias oficiales en la historia?", options: ["Hugo Gatti", "Roberto Mouzo", "Silvio Marzolini", "Juan Román Riquelme"], answer: 1 }, { q: "¿Cuántos partidos invicto alcanzó el equipo de Carlos Bianchi?", options: ["35", "38", "40", "43"], answer: 2 }, { q: "¿Cuántos goles oficiales hizo Martín Palermo en Boca?", options: ["210", "225", "236", "248"], answer: 2 } ],
+                socio: [ { q: "¿Cuál es la fecha exacta de fundación de Boca Juniors?", options: ["1 de enero de 1905", "3 de abril de 1905", "25 de mayo de 1905", "12 de octubre de 1905"], answer: 1 }, { q: "¿En qué año realizó Boca su histórica gira europea?", options: ["1920", "1925", "1930", "1935"], answer: 1 }, { q: "¿A quién le hizo el gol Martín Palermo con muletas en 2000?", options: ["Roberto Bonano", "Germán Burgos", "Amadeo Carrizo", "Franco Armani"], answer: 0 }, { q: "¿Qué barco inspiró los colores Azul y Oro?", options: ["Un barco español", "Un barco sueco", "Un barco inglés", "Un barco italiano"], answer: 1 } ]
+            },
+            "Independiente": {
+                facil: [ { q: "¿Qué apodo histórico recibe el club por sus logros internacionales?", options: ["El Fortín", "El Rey de Copas", "La Academia", "El Ciclón"], answer: 1 }, { q: "¿Cómo se llama actualmente su estadio?", options: ["Doble Visera", "Libertadores de América", "El Cilindro", "La Bombonera"], answer: 1 }, { q: "¿De qué color es su camiseta titular?", options: ["Rojo", "Azul", "Blanco", "Celeste"], answer: 0 }, { q: "¿Cuál es su clásico rival de barrio?", options: ["San Lorenzo", "Boca Juniors", "River Plate", "Racing"], answer: 3 }, { q: "¿Qué jugador histórico utilizaba la camiseta número 10 en los 70s y 80s?", options: ["Diego Maradona", "Ricardo Bochini", "Sergio Agüero", "Daniel Bertoni"], answer: 1 } ],
+                medio: [ { q: "¿Cuántas Copas Libertadores tiene Independiente?", options: ["5", "6", "7", "8"], answer: 2 }, { q: "¿Quién es el máximo goleador histórico del fútbol argentino que jugó en Independiente?", options: ["Martín Palermo", "Ángel Labruna", "Arsenio Erico", "Bernabé Ferreyra"], answer: 2 }, { q: "¿Qué DT lideró muchas de las conquistas de los años 70 y 80?", options: ["José Pastoriza", "César Menotti", "Carlos Bilardo", "Alfio Basile"], answer: 0 }, { q: "¿Entre qué años logró su récord de 4 Copas Libertadores consecutivas?", options: ["1964-1967", "1972-1975", "1982-1985", "1994-1997"], answer: 1 }, { q: "¿En qué año ganó su última Copa Sudamericana en el Maracaná?", options: ["2010", "2015", "2017", "2020"], answer: 2 } ],
+                dificil: [ { q: "¿Cuántas Copas Intercontinentales ganó Independiente?", options: ["1", "2", "3", "4"], answer: 1 }, { q: "¿Cuántos partidos oficiales jugó Ricardo Bochini en el club?", options: ["620", "655", "714", "780"], answer: 2 }, { q: "¿A qué equipo le ganó la Supercopa 1995 en el mítico 'Maracanazo'?", options: ["Flamengo", "Fluminense", "Vasco da Gama", "Botafogo"], answer: 0 }, { q: "¿A qué equipo inglés derrotó en la final Intercontinental de 1984?", options: ["Aston Villa", "Nottingham Forest", "Manchester United", "Liverpool"], answer: 3 }, { q: "¿Cuántos goles oficiales marcó Arsenio Erico en el fútbol argentino (según AFA)?", options: ["250", "275", "295", "320"], answer: 2 } ],
+                socio: [ { q: "¿Cuál es la fecha de fundación oficial de Independiente?", options: ["1 de enero de 1905", "4 de agosto de 1904", "25 de mayo de 1903", "12 de octubre de 1905"], answer: 0 }, { q: "¿Qué color tenía la primera camiseta del club antes de adoptar el rojo?", options: ["Negro", "Blanca con escudo azul", "Verde", "A rayas amarillas y negras"], answer: 1 }, { q: "¿Qué equipo europeo inspiró el uso de la camiseta roja en 1908?", options: ["Manchester United", "Liverpool", "Nottingham Forest", "Arsenal"], answer: 2 }, { q: "¿Con cuántos puntos fue campeón Independiente en el Torneo Apertura 2002?", options: ["40", "43", "45", "47"], answer: 1 }, { q: "¿Cómo se llamaba la tienda donde trabajaban los jóvenes fundadores del club?", options: ["Gath & Chaves", "Tienda A la Ciudad de Londres", "Harrods", "Tienda Los Gallegos"], answer: 1 } ]
+            },
+            "Racing": {
+                facil: [ { q: "¿Cuál es el apodo principal del club?", options: ["El Ciclón", "El Millonario", "La Academia", "El Diablo"], answer: 2 }, { q: "¿Cómo se lo conoce popularmente a su estadio?", options: ["El Cilindro", "La Doble Visera", "El Fortín", "La Bombonera"], answer: 0 }, { q: "¿Cuál es su clásico rival histórico?", options: ["San Lorenzo", "Boca Juniors", "Independiente", "River Plate"], answer: 2 }, { q: "¿Cómo se llama el predio de entrenamiento de Racing?", options: ["Predio Tita Mattiussi", "Villa Olímpica", "Casa Amarilla", "River Camp"], answer: 0 } ],
+                medio: [ { q: "¿Por qué Racing es históricamente 'El Primer Grande'?", options: ["Por ser el primero en tener estadio", "Por el Heptacampeonato amateur", "Por ganar la primera Libertadores", "Por sus colores"], answer: 1 }, { q: "¿Qué título internacional único en Argentina ganó en 1967?", options: ["Primera Libertadores", "Primera Intercontinental", "Primera Sudamericana", "Primera Supercopa"], answer: 1 }, { q: "¿Quién fue el DT del equipo campeón de 2001?", options: ["Diego Simeone", "Eduardo Coudet", "Reinaldo 'Mostaza' Merlo", "Alfio Basile"], answer: 2 }, { q: "¿Qué frase popularizó su DT en el campeonato de 2001?", options: ["A lo Boca", "Paso a paso", "El equipo de José", "La guardia alta"], answer: 1 } ],
+                dificil: [ { q: "¿A qué equipo europeo venció en la Copa Intercontinental 1967?", options: ["Manchester United", "Real Madrid", "Celtic", "Benfica"], answer: 2 }, { q: "¿Qué jugador tiene el récord de presencias en Racing?", options: ["Gustavo Costas", "Natalio Perinetti", "Agustín Cejas", "Claudio Úbeda"], answer: 1 }, { q: "¿Quién es el máximo goleador de la historia del club?", options: ["Alberto Ohaco", "Juan José Pizzuti", "Evaristo Barrera", "Omar Corbatta"], answer: 0 }, { q: "¿Contra qué equipo jugó el partido que le dio el campeonato en 2001?", options: ["River Plate", "Vélez", "Boca Juniors", "San Lorenzo"], answer: 1 } ],
+                socio: [ { q: "¿Cuál es la fecha de fundación oficial de Racing?", options: ["25 de marzo de 1903", "1 de enero de 1905", "15 de agosto de 1904", "12 de octubre de 1903"], answer: 0 }, { q: "¿Cuál es el verdadero nombre de 'El Cilindro'?", options: ["Estadio Juan José Pizzuti", "Estadio Presidente Perón", "Estadio Ciudad de Avellaneda", "Estadio Academia"], answer: 1 }, { q: "¿Quién hizo el histórico gol contra el Celtic en Montevideo (1967)?", options: ["Humberto Maschio", "Alfio Basile", "Juan Carlos Cárdenas", "Roberto Perfumo"], answer: 2 }, { q: "¿De qué colores era la primera camiseta a cuadros de Racing?", options: ["Roja y Azul", "Celeste y Blanca", "Rosa y Celeste", "Negra y Amarilla"], answer: 2 } ]
+            },
+            "San Lorenzo": {
+                facil: [ { q: "¿Cuál es el apodo más común de San Lorenzo?", options: ["El Ciclón", "El Fortín", "El Pincharrata", "El Canalla"], answer: 0 }, { q: "¿Cómo se llama su estadio actual?", options: ["El Palacio", "El Nuevo Gasómetro", "El José Amalfitani", "El Viaducto"], answer: 1 }, { q: "¿Cuál es su clásico rival de barrio?", options: ["Boca Juniors", "Vélez Sarsfield", "Huracán", "Ferro"], answer: 2 }, { q: "¿Qué Papa es hincha fanático y socio del club?", options: ["Juan Pablo II", "Benedicto XVI", "Francisco", "Pío XII"], answer: 2 } ],
+                medio: [ { q: "¿En qué año ganó su única Copa Libertadores de América?", options: ["2010", "2012", "2014", "2016"], answer: 2 }, { q: "¿Quién es el máximo goleador de la historia del club?", options: ["Héctor Scotta", "José Sanfilippo", "Bernardo Romeo", "Leandro Romagnoli"], answer: 1 }, { q: "¿Cómo se llamaba su histórico estadio de Avenida La Plata?", options: ["El Gasómetro", "La Doble Visera", "El Templo", "El Palacio"], answer: 0 }, { q: "¿En qué torneo logró el récord de ser el primer campeón invicto (1968)?", options: ["Torneo Nacional", "Torneo Metropolitano", "Campeonato de Primera", "Copa Argentina"], answer: 1 } ],
+                dificil: [ { q: "¿Quién hizo el gol de penal en la final de la Libertadores 2014?", options: ["Leandro Romagnoli", "Mauro Matos", "Néstor Ortigoza", "Julio Buffarini"], answer: 2 }, { q: "¿A qué equipo le ganó la final de la Copa Mercosur 2001?", options: ["Palmeiras", "Flamengo", "Corinthians", "Vasco da Gama"], answer: 1 }, { q: "¿Qué jugador tiene el récord de más partidos jugados en el club?", options: ["Roberto Telch", "Leandro Romagnoli", "Sergio Villar", "José Albrecht"], answer: 2 }, { q: "¿Cuántos goles hizo Héctor Scotta en el año 1975?", options: ["40", "50", "60", "70"], answer: 2 } ],
+                socio: [ { q: "¿Cuál es la fecha de fundación del club?", options: ["1 de abril de 1908", "25 de mayo de 1905", "1 de enero de 1910", "12 de octubre de 1908"], answer: 0 }, { q: "¿Quién fue el sacerdote que impulsó la fundación del club?", options: ["Padre Mario", "Padre Lorenzo Massa", "Padre Mugica", "Padre Bergoglio"], answer: 1 }, { q: "¿Cómo se lo conocía al brillante equipo de 1968?", options: ["La Máquina", "Los Matadores", "Los Carasucias", "Los Camboyanos"], answer: 1 }, { q: "¿En qué año se jugó el último partido en el Viejo Gasómetro?", options: ["1979", "1981", "1983", "1993"], answer: 0 } ]
+            },
+            "Huracán": {
+                facil: [ { q: "¿Cuál es el apodo principal del club?", options: ["El Ciclón", "El Globo / Quemeros", "El Fortín", "Los Bichos"], answer: 1 }, { q: "¿Cómo se llama el estadio de Huracán?", options: ["José Amalfitani", "Nuevo Gasómetro", "Tomás Adolfo Ducó", "Diego A. Maradona"], answer: 2 }, { q: "¿Cuáles son sus colores tradicionales?", options: ["Rojo y Blanco", "Blanco y Granate", "Blanco y Rojo", "Blanco con vivo Rojo"], answer: 2 }, { q: "¿Cuál es su clásico rival?", options: ["San Lorenzo", "Vélez Sarsfield", "Boca Juniors", "Argentinos Juniors"], answer: 0 }, { q: "¿A qué histórico barrio porteño pertenece?", options: ["Boedo", "Parque Patricios", "La Paternal", "Mataderos"], answer: 1 } ],
+                medio: [ { q: "¿En qué año Huracán salió Campeón del emblemático Torneo Metropolitano?", options: ["1967", "1973", "1978", "1981"], answer: 1 }, { q: "¿Quién fue el DT de ese histórico equipo campeón?", options: ["César Luis Menotti", "Ángel Cappa", "Carlos Babington", "Alfio Basile"], answer: 0 }, { q: "¿Qué copa nacional conquistó en el año 2014?", options: ["Copa Argentina", "Copa de la Liga", "Supercopa Argentina", "Copa Centenario"], answer: 0 }, { q: "¿Qué jugador histórico es considerado el mayor ídolo y símbolo del club?", options: ["René Houseman", "Herminio Masantonio", "Miguel Brindisi", "Javier Pastore"], answer: 1 } ],
+                dificil: [ { q: "¿Quién es el máximo goleador histórico de Huracán?", options: ["Emilio Baldonedo", "René Houseman", "Herminio Masantonio", "Tomás Ducó"], answer: 2 }, { q: "¿A qué equipo venció en la final de la Copa Argentina 2014?", options: ["River Plate", "Boca Juniors", "Rosario Central", "San Lorenzo"], answer: 2 }, { q: "¿A qué instancia internacional máxima llegó en la Copa Sudamericana 2015?", options: ["Semifinales", "Final", "Cuartos de final", "Campeón"], answer: 1 }, { q: "¿Qué jugador histórico tiene el récord de mayor cantidad de presencias en el club?", options: ["Jorge Alberti", "Miguel Brindisi", "Carlos Babington", "Roque Avallay"], answer: 0 } ],
+                socio: [ { q: "¿En qué año se fundó oficialmente el Club Atlético Huracán?", options: ["1 de enero de 1908", "1 de noviembre de 1908", "25 de mayo de 1905", "12 de octubre de 1908"], answer: 1 }, { q: "¿De quién tomó su nombre el club 'Huracán'?", options: ["Un viento fuerte de la zona", "El globo aerostático de Jorge Newbery", "Un barco", "Una tienda de Parque Patricios"], answer: 1 }, { q: "¿Qué cargo ocupó el histórico Tomás Adolfo Ducó además de jugador?", options: ["Sacerdote", "Presidente del Club y Militar", "Gobernador", "Médico"], answer: 1 }, { q: "¿Cuántos títulos de Primera División en la era Amateur posee Huracán?", options: ["2", "3", "4", "5"], answer: 2 } ]
+            }
+        };
+
+        // === VARIABLES DEL JUEGO ===
+        const levels = ["facil", "medio", "dificil", "socio"];
+        let currentLevelIndex = 0;
+        let correctAnswers = 0;
+        const requiredToAdvance = 5;
+        let availableQuestions = {};
+        let currentQuestionObj = null;
+        let currentOptionsMap = [];
+        let isChicana = false; 
+        let chicanaAprobada = false;
+
+        function setClubBackground(club) {
+            const gameScreen = document.getElementById('game-screen');
+            gameScreen.className = 'screen active'; 
+            
+            if (club === "River Plate") gameScreen.classList.add('bg-river');
+            else if (club === "Boca Juniors") gameScreen.classList.add('bg-boca');
+            else if (club === "Independiente") gameScreen.classList.add('bg-independiente');
+            else if (club === "Racing") gameScreen.classList.add('bg-racing');
+            else if (club === "San Lorenzo") gameScreen.classList.add('bg-sanlorenzo');
+            else if (club === "Huracán") gameScreen.classList.add('bg-huracan');
+        }
+
+        function startGame() {
+            const selectedClub = clubs[currentClubIndex];
+            const clubQuestions = database[selectedClub];
+
+            availableQuestions = {
+                facil: [...clubQuestions.facil],
+                medio: [...clubQuestions.medio],
+                dificil: [...clubQuestions.dificil],
+                socio: [...clubQuestions.socio]
+            };
+
+            currentLevelIndex = 0;
+            correctAnswers = 0;
+            isChicana = false;
+            chicanaAprobada = false;
+            
+            document.getElementById('final-action-btn').style.display = 'none';
+            document.getElementById('fe-hincha-btn').style.display = 'none';
+            document.getElementById('back-menu-btn').style.display = 'none';
+            document.getElementById('options-container').style.display = 'flex';
+            
+            gameTimer = 0;
+            clearInterval(timerInterval);
+            document.getElementById('main-timer').innerText = "00:00";
+            timerInterval = setInterval(() => {
+                gameTimer++;
+                document.getElementById('main-timer').innerText = formatTime(gameTimer);
+            }, 1000);
+
+            switchScreen('game-screen', document.getElementById('nav-inicio'));
+            setClubBackground(selectedClub);
+            loadNextQuestion();
+        }
+
+        function restartFromCurrentLevel() {
+            const selectedClub = clubs[currentClubIndex];
+            const currentDifficulty = levels[currentLevelIndex];
+            
+            // Recargamos las preguntas de este nivel para no quedarnos sin stock tras morir
+            availableQuestions[currentDifficulty] = [...database[selectedClub][currentDifficulty]];
+            
+            correctAnswers = 0;
+            chicanaAprobada = false; 
+            
+            document.getElementById('final-action-btn').style.display = 'none';
+            document.getElementById('fe-hincha-btn').style.display = 'none';
+            document.getElementById('back-menu-btn').style.display = 'none';
+            document.getElementById('options-container').style.display = 'flex';
+            document.getElementById('status-container').style.opacity = '1';
+            
+            // El timer no se resetea a 0. Sigue corriendo para mantener el tiempo global gastado.
+            // Solo reactivamos el intervalo que se frenó al perder.
+            timerInterval = setInterval(() => {
+                gameTimer++;
+                document.getElementById('main-timer').innerText = formatTime(gameTimer);
+            }, 1000);
+            
+            loadNextQuestion();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function loadNextQuestion() {
+            const currentDifficulty = levels[currentLevelIndex];
+            const selectedClub = clubs[currentClubIndex];
+            const gameScreen = document.getElementById('game-screen');
+            
+            // La Chicana aparece justo al iniciar "Socio" y antes de aprobarse
+            if (currentDifficulty === 'socio' && !chicanaAprobada) {
+                isChicana = true;
+                currentQuestionObj = chicanas[selectedClub];
+                gameScreen.classList.add('chicana-dark-mode');
+                document.getElementById('level-title').innerText = "CHICANA";
+                document.getElementById('level-title').style.color = "#ff00ff";
+            } else {
+                isChicana = false;
+                gameScreen.classList.remove('chicana-dark-mode');
+                document.getElementById('level-title').style.color = "#cccccc";
+                
+                const pool = availableQuestions[currentDifficulty];
+                const randomIndex = Math.floor(Math.random() * pool.length);
+                currentQuestionObj = pool[randomIndex];
+                pool.splice(randomIndex, 1);
+                
+                document.getElementById('level-title').innerText = `Nivel: ${currentDifficulty.toUpperCase()}`;
+            }
+
+            document.getElementById('question-text').innerText = currentQuestionObj.q;
+            document.getElementById('counter-text').innerText = `${correctAnswers}/${requiredToAdvance}`;
+
+            currentOptionsMap = currentQuestionObj.options.map((opt, originalIndex) => ({
+                text: opt,
+                isCorrect: originalIndex === currentQuestionObj.answer
+            }));
+            
+            shuffleArray(currentOptionsMap);
+
+            for (let i = 0; i < 4; i++) {
+                const btn = document.getElementById(`btn-${i}`);
+                btn.innerText = currentOptionsMap[i].text;
+                
+                if (selectedClub === "Huracán" && !isChicana) {
+                    btn.style.backgroundColor = "rgba(0,0,0,0.85)";
+                } else {
+                    btn.style.backgroundColor = "rgba(0,0,0,0.7)";
+                }
+                
+                btn.style.borderColor = "#ffffff";
+                btn.disabled = false;
+            }
+        }
+
+        function checkAnswer(selectedIndex) {
+            for (let i = 0; i < 4; i++) { document.getElementById(`btn-${i}`).disabled = true; }
+
+            const btn = document.getElementById(`btn-${selectedIndex}`);
+            const isCorrect = currentOptionsMap[selectedIndex].isCorrect;
+            
+            if (isCorrect) {
+                btn.style.backgroundColor = "rgba(0, 128, 0, 0.9)"; 
+                btn.style.borderColor = "#00ff00";
+
+                if (isChicana) {
+                    chicanaAprobada = true;
+                    setTimeout(loadNextQuestion, 1200);
+                    return;
+                }
+
+                correctAnswers++;
+                document.getElementById('counter-text').innerText = `${correctAnswers}/${requiredToAdvance}`;
+
+                if (correctAnswers >= requiredToAdvance) {
+                    correctAnswers = 0;
+                    currentLevelIndex++;
+                    
+                    setTimeout(() => {
+                        if (currentLevelIndex < levels.length) {
+                            const nextLevel = levels[currentLevelIndex];
+                            const qText = document.getElementById('question-text');
+                            
+                            if (nextLevel === "medio") qText.innerHTML = '<span style="color: #90ee90;">Siguiente nivel: Medio</span>';
+                            else if (nextLevel === "dificil") qText.innerHTML = '<span style="color: #ffa500;">Siguiente nivel: Difícil</span>';
+                            else if (nextLevel === "socio") qText.innerHTML = '<span style="color: #ff0000;">Siguiente nivel: Socio (Chicana Inminente)</span>';
+                            
+                            document.getElementById('options-container').style.display = 'none';
+                            
+                            setTimeout(() => {
+                                document.getElementById('options-container').style.display = 'flex';
+                                loadNextQuestion();
+                            }, 2000); 
+
+                        } else {
+                            showWinScreen();
+                        }
+                    }, 500);
+                } else {
+                    setTimeout(loadNextQuestion, 800);
+                }
+            } else {
+                btn.style.backgroundColor = "rgba(204, 0, 0, 0.9)"; 
+                btn.style.borderColor = "#ff0000";
+                
+                const correctIndex = currentOptionsMap.findIndex(opt => opt.isCorrect);
+                const correctBtn = document.getElementById(`btn-${correctIndex}`);
+                correctBtn.style.backgroundColor = "rgba(0, 128, 0, 0.9)";
+
+                setTimeout(showLoseScreen, 1500);
+            }
+        }
+
+        function showLoseScreen() {
+            clearInterval(timerInterval);
+            const clubName = clubs[currentClubIndex];
+            document.getElementById('game-screen').classList.remove('chicana-dark-mode');
+            document.getElementById('question-text').innerText = `Usted no es un verdadero fanático de ${clubName}...`;
+            document.getElementById('options-container').style.display = 'none';
+            document.getElementById('status-container').style.opacity = '0'; 
+            
+            const actionBtn = document.getElementById('final-action-btn');
+            actionBtn.innerText = "Volver a jugar";
+            actionBtn.onclick = startGame;
+            actionBtn.style.display = 'block';
+
+            // Muestra botón "La fe del hincha" solo en Difícil (2) o Socio (3)
+            const feBtn = document.getElementById('fe-hincha-btn');
+            if (currentLevelIndex >= 2) { 
+                feBtn.style.display = 'block';
+            } else {
+                feBtn.style.display = 'none';
+            }
+
+            document.getElementById('back-menu-btn').style.display = 'block';
+        }
+
+        function showWinScreen() {
+            clearInterval(timerInterval); // Cortamos el timer definitivo.
+            const clubName = clubs[currentClubIndex];
+            document.getElementById('game-screen').classList.remove('chicana-dark-mode');
+            document.getElementById('question-text').innerText = `¡Usted es un socio de ${clubName} con todas las letras!\nTiempo: ${formatTime(gameTimer)}`;
+            document.getElementById('options-container').style.display = 'none';
+            document.getElementById('status-container').style.opacity = '0'; 
+            
+            let playerName = prompt("¡Felicidades! Ingresá tu nombre para la tabla de posiciones:") || "Socio Anónimo";
+            
+            // Pusheamos con el tiempo real de la partida finalizada
+            leaderboardData.push({ name: playerName, club: clubName, time: gameTimer });
+
+            const actionBtn = document.getElementById('final-action-btn');
+            actionBtn.innerText = "Obtener reconocimiento";
+            actionBtn.onclick = triggerCardAnimation; 
+            actionBtn.style.display = 'block';
+            
+            document.getElementById('fe-hincha-btn').style.display = 'none';
+            document.getElementById('back-menu-btn').style.display = 'block';
+        }
+
+        function triggerCardAnimation() {
+            document.getElementById('final-action-btn').style.display = 'none';
+            document.getElementById('back-menu-btn').style.display = 'none';
+            document.getElementById('question-text').innerText = "Generando credencial...";
+
+            const flyingCard = document.createElement('div');
+            flyingCard.className = 'flying-card';
+            
+            flyingCard.innerHTML = `
+                <div style="display:flex; gap:10px; padding:10px; height:100%; box-sizing:border-box;">
+                    <div style="width:30px; background:#fff; border-radius:4px;"></div>
+                    <div style="display:flex; flex-direction:column; gap:6px; flex-grow:1;">
+                        <div style="height:4px; background:#fff;"></div>
+                        <div style="height:4px; background:#fff;"></div>
+                        <div style="height:4px; background:#fff; width:60%;"></div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(flyingCard);
+            flyingCard.style.top = '50%';
+            flyingCard.style.left = '50%';
+            flyingCard.style.transform = 'translate(-50%, -50%)';
+            flyingCard.style.position = 'absolute';
+            flyingCard.style.width = '150px';
+            flyingCard.style.height = '90px';
+            flyingCard.style.border = '3px solid #fff';
+            flyingCard.style.borderRadius = '8px';
+            flyingCard.style.background = 'rgba(255,255,255,0.15)';
+            flyingCard.style.transition = 'all 1.2s ease-in-out';
+            flyingCard.style.zIndex = '500';
+
+            void flyingCard.offsetWidth;
+
+            const menuIcon = document.getElementById('menu-toggle-btn').getBoundingClientRect();
+            
+            setTimeout(() => {
+                flyingCard.style.top = `${menuIcon.top}px`;
+                flyingCard.style.left = `${menuIcon.left}px`;
+                flyingCard.style.transform = 'translate(0, 0) scale(0.1)';
+                flyingCard.style.opacity = '0';
+            }, 100);
+
+            setTimeout(() => {
+                flyingCard.remove();
+                unlockedClubs[clubs[currentClubIndex]] = true; 
+                renderVitrina(); 
+                switchScreen('vitrina-screen', document.getElementById('nav-vitrina')); 
+            }, 1300); 
+        }
+    </script>
+</body>
+</html>
