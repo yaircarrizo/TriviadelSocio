@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="logopag.png" type="image/x-icon">
     <title>Trivia del Socio</title>
     
     <script type="module">
@@ -28,7 +27,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Exponer funciones necesarias globalmente para que las use tu script actual
         window.fbSaveScore = async function(name, club, time) {
             try {
                 const scoresRef = ref(db, 'leaderboard');
@@ -57,7 +55,6 @@
             }
         };
 
-        // Cargar la tabla al iniciar la página
         window.addEventListener('DOMContentLoaded', () => {
             window.loadLeaderboardFromFirebase();
         });
@@ -78,7 +75,6 @@
             position: relative;
         }
 
-        /* Sistema de Vistas (Pantallas) */
         .screen {
             display: none;
             flex-direction: column;
@@ -138,22 +134,38 @@
             box-shadow: 1px 1px 2px rgba(0,0,0,0.8);
         }
 
-        .logo-decoration {
-            width: 50px;
+        /* LOGO CENTRADO EN EL HEADER (Para pantallas Menú, Vitrina, Posiciones) */
+        .header-logo {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
             height: 50px;
-            border: none;
-            border-radius: 50%;
-            margin: 0 0 0 20px;
+            display: none; /* Se maneja por JS */
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .header-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* LOGO DEL LOGIN (Elevado y Rectangular) */
+        .login-logo {
+            width: 250px;
+            height: 80px;
+            margin-bottom: 40px; 
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 10px;
-            text-align: center;
-            box-shadow: 1px 1px 4px rgba(0,0,0,0.8);
-            cursor: default;
-            padding: 0;
-            overflow: hidden;
-            background-color: #000000;
+        }
+
+        .login-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .timer-display {
@@ -164,7 +176,7 @@
             display: none;
         }
 
-        /* === FONDOS PERSONALIZADOS POR EQUIPO === */
+        /* === FONDOS PERSONALIZADOS POR EQUIPO (Incluye Lanús y Banfield) === */
         .bg-river { background: linear-gradient(135deg, #000000 45%, #cc0000 45%, #cc0000 55%, #000000 55%); }
         .bg-boca { background: linear-gradient(to bottom, #001a4d 35%, #a68a00 35%, #a68a00 55%, #001a4d 55%); }
         .bg-independiente {
@@ -203,6 +215,9 @@
         .bg-huracan::after { right: 10px; }
         .bg-huracan .question { color: #ffffff; text-shadow: 2px 2px 8px #000000, -1px -1px 4px #000000; }
         .bg-huracan .option-btn { background-color: rgba(0, 0, 0, 0.85); color: #ffffff; }
+
+        .bg-lanus { background-color: #800000; }
+        .bg-banfield { background: repeating-linear-gradient(90deg, #006400, #006400 50px, #ffffff 50px, #ffffff 100px); }
 
         .chicana-dark-mode::after {
             content: '';
@@ -579,7 +594,16 @@
             max-width: 300px;
         }
 
-        .action-btn:hover { background-color: #cccccc; }
+        .action-btn:hover:not(:disabled) { background-color: #cccccc; }
+
+        /* Estilo para botón deshabilitado */
+        .action-btn:disabled {
+            background-color: #444444 !important;
+            color: #888888 !important;
+            border-color: #222222 !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+        }
 
         .btn-inverted {
             background-color: #000000;
@@ -677,9 +701,9 @@
                 <span></span>
                 <span></span>
             </button>
-            <figure class="logo-decoration" style="padding: 0; overflow: hidden; background-color: #000000;">
-                <img src="logo.png" alt="Logo" style="width: 100%; height: 100%; object-fit: cover;">
-            </figure>
+        </div>
+        <div class="header-logo" id="header-logo">
+            <img src="Gemini_Generated_Image_4u8ifx4u8ifx4u8i-removebg-preview.png" alt="Trivia del Socio">
         </div>
         <div class="timer-display" id="main-timer">00:00</div>
     </header>
@@ -694,6 +718,9 @@
     </aside>
 
     <div id="login-screen" class="screen active">
+        <div class="login-logo">
+            <img src="Gemini_Generated_Image_4u8ifx4u8ifx4u8i-removebg-preview.png" alt="Trivia del Socio Logo">
+        </div>
         <div class="login-box">
             <h2>Identifíquese, socio.</h2>
             <input type="text" id="username-input" class="login-input" placeholder="Tu nombre de usuario" maxlength="15">
@@ -712,7 +739,7 @@
             </div>
             <button class="carousel-btn" onclick="nextClub()">&#10095;</button>
         </div>
-        <button class="action-btn" style="display: block; position: relative; z-index: 10;" onclick="startGame()">¡Quiero ser socio!</button>
+        <button id="play-btn" class="action-btn" style="display: block; position: relative; z-index: 10;" onclick="startGame()">¡Quiero ser socio!</button>
     </main>
 
     <main id="vitrina-screen" class="screen">
@@ -766,31 +793,22 @@
 
     <script>
         let currentPlayer = localStorage.getItem('vf_player') || "Socio Anónimo";
-        const clubs = ["River Plate", "Boca Juniors", "Independiente", "Racing", "San Lorenzo", "Huracán"];
+        
+        // SE AÑADIERON LANÚS Y BANFIELD A LA LISTA
+        const clubs = ["River Plate", "Boca Juniors", "Independiente", "Racing", "San Lorenzo", "Huracán", "Lanús", "Banfield"];
         let currentClubIndex = 0;
         
+        // SE AÑADIERON LANÚS Y BANFIELD AL ESTADO GUARDADO DE LA VITRINA
         let unlockedClubs = JSON.parse(localStorage.getItem('vf_unlocked')) || {
             "River Plate": false, "Boca Juniors": false, "Independiente": false,
-            "Racing": false, "San Lorenzo": false, "Huracán": false
+            "Racing": false, "San Lorenzo": false, "Huracán": false,
+            "Lanús": false, "Banfield": false
         };
 
         let leaderboardData = [];
         let gameTimer = 0;
         let timerInterval;
         let feHinchaUsed = false;
-
-        // ==========================================
-        // VARIABLES DE ESTADO DEL JUEGO (CORREGIDAS)
-        // ==========================================
-        const levels = ['facil', 'medio', 'dificil', 'socio'];
-        const requiredToAdvance = 5;
-        let currentLevelIndex = 0;
-        let correctAnswers = 0;
-        let availableQuestions = {};
-        let currentQuestionObj = null;
-        let currentOptionsMap = [];
-        let isChicana = false;
-        let chicanaAprobada = false;
 
         window.addEventListener('DOMContentLoaded', () => {
             if (localStorage.getItem('vf_player')) {
@@ -819,7 +837,7 @@
             const grid = document.getElementById('vitrina-grid');
             grid.innerHTML = '';
             clubs.forEach(club => {
-                const isUnlocked = unlockedClubs[club];
+                const isUnlocked = unlockedClubs[club] || false;
                 grid.innerHTML += `
                     <div class="card-wrapper">
                         <div class="socio-card ${isUnlocked ? 'unlocked' : ''}">
@@ -894,6 +912,16 @@
             document.getElementById('status-container').style.opacity = (screenId === 'game-screen') ? '1' : '0';
             document.getElementById('main-timer').style.display = (screenId === 'game-screen') ? 'block' : 'none';
             
+            // Lógica para mostrar/ocultar el logo del encabezado
+            const headerLogo = document.getElementById('header-logo');
+            if (headerLogo) {
+                if (screenId === 'login-screen' || screenId === 'game-screen') {
+                    headerLogo.style.display = 'none';
+                } else {
+                    headerLogo.style.display = 'flex';
+                }
+            }
+
             if(screenId !== 'game-screen') clearInterval(timerInterval);
         }
 
@@ -909,12 +937,23 @@
             centerTeam.classList.remove('pop-anim');
             void centerTeam.offsetWidth; 
             centerTeam.classList.add('pop-anim');
+
+            // SISTEMA DE BLOQUEO PARA LANÚS Y BANFIELD
+            const playBtn = document.getElementById('play-btn');
+            const currentSelectedClub = clubs[currentClubIndex];
+            
+            if (currentSelectedClub === "Lanús" || currentSelectedClub === "Banfield") {
+                playBtn.disabled = true;
+                playBtn.innerText = "Próximamente";
+            } else {
+                playBtn.disabled = false;
+                playBtn.innerText = "¡Quiero ser socio!";
+            }
         }
 
         function nextClub() { currentClubIndex = (currentClubIndex + 1) % clubs.length; updateCarousel(); }
         function prevClub() { currentClubIndex = (currentClubIndex - 1 + clubs.length) % clubs.length; updateCarousel(); }
 
-        // === CHICANAS EN FORMATO ARRAY (5 POR CLUB) ===
         const chicanas = {
             "River Plate": [
                 { q: "Pregunta chicana:\n¿En qué año ocurrió el suceso por el cual las hinchadas rivales cantan sobre 'el fantasma de la B'?", options: ["2008", "2011", "2013", "1983"], answer: 1 },
@@ -960,7 +999,6 @@
             ]
         };
 
-        // === BASE DE DATOS AMPLIADA Y VERIFICADA ===
         const database = {
             "River Plate": {
                 facil: [ 
@@ -1192,7 +1230,16 @@
             }
         };
 
-        // === LÓGICA DEL JUEGO ===
+        const levels = ["facil", "medio", "dificil", "socio"];
+        let currentLevelIndex = 0;
+        let correctAnswers = 0;
+        const requiredToAdvance = 5;
+        let availableQuestions = {};
+        let currentQuestionObj = null;
+        let currentOptionsMap = [];
+        let isChicana = false; 
+        let chicanaAprobada = false;
+
         function setClubBackground(club) {
             const gameScreen = document.getElementById('game-screen');
             gameScreen.className = 'screen active'; 
@@ -1203,6 +1250,8 @@
             else if (club === "Racing") gameScreen.classList.add('bg-racing');
             else if (club === "San Lorenzo") gameScreen.classList.add('bg-sanlorenzo');
             else if (club === "Huracán") gameScreen.classList.add('bg-huracan');
+            else if (club === "Lanús") gameScreen.classList.add('bg-lanus');
+            else if (club === "Banfield") gameScreen.classList.add('bg-banfield');
         }
 
         function startGame() {
