@@ -10,7 +10,7 @@
         import { getDatabase, ref, set, get, child, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         // =========================================================================
-        // CONFIGURACIÓN DE FIREBASE (Reemplazá esto con los datos de tu proyecto)
+        // CONFIGURACIÓN DE FIREBASE 
         // =========================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyB49tUhXD7xdu8Q-R6MenQmwjepWt8bWIA",
@@ -764,7 +764,6 @@
     </footer>
 
     <script>
-        // === GESTIÓN DE USUARIO Y CLUBES ===
         let currentPlayer = localStorage.getItem('vf_player') || "Socio Anónimo";
         const clubs = ["River Plate", "Boca Juniors", "Independiente", "Racing", "San Lorenzo", "Huracán"];
         let currentClubIndex = 0;
@@ -867,7 +866,6 @@
             }
         }
 
-        // === NAVEGACIÓN ===
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 
         function switchScreen(screenId, btnElement) {
@@ -902,67 +900,285 @@
         function nextClub() { currentClubIndex = (currentClubIndex + 1) % clubs.length; updateCarousel(); }
         function prevClub() { currentClubIndex = (currentClubIndex - 1 + clubs.length) % clubs.length; updateCarousel(); }
 
-        // === PREGUNTAS CHICANAS AL PROPIO CLUB ===
+        // === CHICANAS EN FORMATO ARRAY (5 POR CLUB) ===
         const chicanas = {
-            "River Plate": { q: "Pregunta chicana:\n¿Qué famoso 'fantasma' de una sola letra persiguió al club tras su peor momento histórico?", options: ["El fantasma de la A", "El fantasma de la B", "El fantasma de la C", "El fantasma de Madrid"], answer: 1 },
-            "Boca Juniors": { q: "Pregunta chicana:\n¿En qué histórico partido del año 2018 el equipo 'murió' futbolísticamente en Europa?", options: ["Final Intercontinental 2000", "Final Libertadores 9/12/2018", "Octavos Libertadores 2015", "Supercopa Argentina 2018"], answer: 1 },
-            "Independiente": { q: "Pregunta chicana:\n¿Qué apodo despectivo le suelen decir sus rivales por la supuesta 'falta de aliento' y años de sequía local?", options: ["Los Amargos", "Los Pingüinos", "Los Mufas", "Los Llorones"], answer: 0 },
-            "Racing": { q: "Pregunta chicana:\n¿Cómo le decían despectivamente al club durante el gerenciamiento que lo salvó de la quiebra en 1999?", options: ["Blanquiceleste S.A. / Empresa", "Racing Club S.A.", "La Academia S.A.", "Sin Barrio"], answer: 0 },
-            "San Lorenzo": { q: "Pregunta chicana:\n¿Qué club es objeto constante de burla por ser considerado 'sin barrio' y terminar con un hipermercado?", options: ["Vélez", "Huracán", "Ferro", "San Lorenzo"], answer: 3 },
-            "Huracán": { q: "Pregunta chicana:\n¿Cuántas veces descendió a la B el autodenominado 'Sexto Grande'?", options: ["1 vez", "2 veces", "3 veces", "4 veces"], answer: 3 }
+            "River Plate": [
+                { q: "Pregunta chicana:\n¿En qué año ocurrió el suceso por el cual las hinchadas rivales cantan sobre 'el fantasma de la B'?", options: ["2008", "2011", "2013", "1983"], answer: 1 },
+                { q: "Pregunta chicana:\n¿Qué apodo despectivo surgió luego de que le tiraran maíz y pañales a los jugadores en 1966?", options: ["Millonarios", "Gallinas", "Banda Roja", "Pecho Fríos"], answer: 1 },
+                { q: "Pregunta chicana:\n¿Qué mediocampista propio popularizó la frase 'silencio atroz' hablando de su hinchada en 2008?", options: ["Oscar Ahumada", "Matías Almeyda", "Ariel Ortega", "Eduardo Coudet"], answer: 0 },
+                { q: "Pregunta chicana:\n¿Qué equipo le dio vuelta la final de la Copa Libertadores 2019 en apenas 3 minutos?", options: ["Boca Juniors", "Palmeiras", "Flamengo", "Tigres"], answer: 2 },
+                { q: "Pregunta chicana:\n¿Quién fue el verdugo de Belgrano que sentenció la serie de Promoción en el Monumental?", options: ["César Mansanelli", "Guillermo Farré", "Franco Vázquez", "Chiqui Pérez"], answer: 1 }
+            ],
+            "Boca Juniors": [
+                { q: "Pregunta chicana:\n¿En qué histórico partido del año 2018 el equipo 'murió' futbolísticamente frente a su clásico rival?", options: ["Supercopa Argentina 2018", "Final Libertadores 9/12/2018", "Octavos Libertadores 2015", "Final Sudamericana 2014"], answer: 1 },
+                { q: "Pregunta chicana:\n¿Qué vergonzoso hecho provocó la suspensión del clásico en la Libertadores 2015?", options: ["Invasión de campo", "Gas pimienta a los rivales", "Corte de luz", "Agresión al árbitro"], answer: 1 },
+                { q: "Pregunta chicana:\n¿En qué año Boca Juniors ascendió a Primera División mediante una reestructuración (decreto) y no en la cancha?", options: ["Nunca pasó", "1908", "1913", "1920"], answer: 2 },
+                { q: "Pregunta chicana:\n¿Desde qué año el club no logra ganar la tan ansiada séptima Copa Libertadores?", options: ["2003", "2007", "2012", "2018"], answer: 1 },
+                { q: "Pregunta chicana:\n¿Qué famoso apodo se ganaron por supuestamente abandonar el partido del gas pimienta en el entretiempo?", options: ["Tiraste gas, abandonaste", "El fantasma de la B", "Rompiste el carnet", "Los pinguinos"], answer: 0 }
+            ],
+            "Independiente": [
+                { q: "Pregunta chicana:\n¿Qué apodo despectivo le suelen decir sus rivales por la supuesta 'falta de aliento' local?", options: ["Los Amargos", "Los Pingüinos", "Los Mufas", "Los Llorones"], answer: 0 },
+                { q: "Pregunta chicana:\n¿En qué año el llamado 'Rey de Copas' descendió por primera y única vez a la B Nacional?", options: ["2011", "2012", "2013", "2014"], answer: 2 },
+                { q: "Pregunta chicana:\n¿Desde qué año Independiente no logra consagrarse campeón de la liga local (torneo regular) en Argentina?", options: ["1994", "2002", "2010", "2017"], answer: 1 },
+                { q: "Pregunta chicana:\n¿Qué famoso influencer tuvo que realizar una colecta para salvar al club de la quiebra en 2023?", options: ["Ibai Llanos", "Santi Maratea", "Coscu", "Bizarrap"], answer: 1 },
+                { q: "Pregunta chicana:\n¿Con qué rubro comercial suelen burlarse los hinchas de Racing por la actual crisis de su sede/cancha?", options: ["Ciber", "Supermercado", "Fiambrería", "Panadería"], answer: 1 }
+            ],
+            "Racing": [
+                { q: "Pregunta chicana:\n¿Qué animal enterraron supuestamente los hinchas de Independiente en el Cilindro para mufarlos?", options: ["Perros", "Gatos", "Sapos", "Culebras"], answer: 2 },
+                { q: "Pregunta chicana:\n¿Cómo le decían despectivamente al club durante el gerenciamiento que lo salvó de la quiebra en 1999?", options: ["Blanquiceleste S.A.", "Empresa FC", "La Academia S.A.", "Sin Barrio"], answer: 0 },
+                { q: "Pregunta chicana:\n¿Cuántos años estuvo 'La Academia' sin poder salir campeón en el torneo local antes del 2001?", options: ["25 años", "30 años", "35 años", "40 años"], answer: 2 },
+                { q: "Pregunta chicana:\n¿Qué extraño objeto se vio en la popular durante los festejos de un campeonato rompiendo el mito de club ordenado?", options: ["Una urna funeraria", "Un changuito de supermercado y un redoblante roto", "Una butaca quemada", "Un inodoro"], answer: 1 },
+                { q: "Pregunta chicana:\n¿En qué año descendió y tuvo que festejar el ascenso 'alquilando' el equipo a otra institución?", options: ["1983", "1984", "1985", "1999"], answer: 0 }
+            ],
+            "San Lorenzo": [
+                { q: "Pregunta chicana:\n¿Qué club es objeto constante de burla por terminar con un hipermercado en sus tierras originales?", options: ["Vélez", "Huracán", "Ferro", "San Lorenzo"], answer: 3 },
+                { q: "Pregunta chicana:\n¿Qué famoso canto le dedican sus rivales por haber perdido el predio histórico de Avenida La Plata?", options: ["De qué barrio sos", "El fantasma de la B", "Equipo chico", "Los mufas"], answer: 0 },
+                { q: "Pregunta chicana:\n¿Cuántos años de vida tuvo que esperar el club para ganar su primera y única Copa Libertadores?", options: ["80 años", "95 años", "106 años", "110 años"], answer: 2 },
+                { q: "Pregunta chicana:\n¿En qué año se convirtió en el primer equipo de los considerados 'grandes' en descender a la B?", options: ["1981", "1983", "2011", "2013"], answer: 0 },
+                { q: "Pregunta chicana:\n¿Qué supermercado construyó su sucursal donde antiguamente estaba el Viejo Gasómetro?", options: ["Coto", "Jumbo", "Carrefour", "Walmart"], answer: 2 }
+            ],
+            "Huracán": [
+                { q: "Pregunta chicana:\n¿Cuántas veces descendió a la B el club de Parque Patricios a lo largo de su historia?", options: ["1 vez", "2 veces", "3 veces", "4 veces"], answer: 3 },
+                { q: "Pregunta chicana:\n¿Qué estatus histórico se autoproclaman a pesar de las burlas sobre su falta de copas modernas?", options: ["El Primer Grande", "El Sexto Grande", "El Rey de Copas", "El Capo del Sur"], answer: 1 },
+                { q: "Pregunta chicana:\n¿Cuántos campeonatos de Primera División ganó Huracán en la era del profesionalismo (desde 1931)?", options: ["1 (Torneo Metropolitano 1973)", "2", "3", "5"], answer: 0 },
+                { q: "Pregunta chicana:\n¿Qué club tiene una paternidad histórica abrumadora (amplia diferencia de partidos) sobre Huracán?", options: ["Boca Juniors", "Independiente", "San Lorenzo", "Racing"], answer: 2 },
+                { q: "Pregunta chicana:\n¿Sobre qué detalle de su enorme estadio suelen burlarse habitualmente las hinchadas rivales?", options: ["No tiene techo", "El estado del césped", "Que las tribunas suelen estar vacías", "Que se inunda fácil"], answer: 2 }
+            ]
         };
 
-        // === BASE DE DATOS ===
+        // === BASE DE DATOS AMPLIADA Y VERIFICADA ===
         const database = {
             "River Plate": {
-                facil: [ { q: "¿En qué estadio juega de local River Plate?", options: ["La Bombonera", "El Monumental", "El Cilindro", "El Nuevo Gasómetro"], answer: 1 }, { q: "¿Cuáles son los colores históricos de la camiseta titular?", options: ["Blanco y Negro", "Rojo y Negro", "Blanco y Rojo", "Azul y Amarillo"], answer: 2 }, { q: "¿En qué año se fundó el club?", options: ["1905", "1910", "1901", "1899"], answer: 2 }, { q: "¿Qué apodo recibe popularmente el club?", options: ["El Rey de Copas", "El Millonario", "La Academia", "El Fortín"], answer: 1 }, { q: "¿Qué clásico rival histórico tiene River Plate?", options: ["Independiente", "Racing", "Boca Juniors", "San Lorenzo"], answer: 2 } ],
-                medio: [ { q: "¿Cuántas Copas Libertadores tiene River Plate?", options: ["3", "4", "5", "7"], answer: 1 }, { q: "¿Quién es el máximo goleador histórico de River?", options: ["Ángel Labruna", "Enzo Francescoli", "Fernando Cavenaghi", "Bernabé Ferreyra"], answer: 0 }, { q: "¿A qué equipo le ganó la final de la Copa Libertadores 2018?", options: ["Tigres", "Flamengo", "Boca Juniors", "Gremio"], answer: 2 }, { q: "¿Qué jugador anotó el tercer gol en Madrid en 2018?", options: ["Lucas Pratto", "Juan F. Quintero", "Gonzalo Martínez", "Ignacio Scocco"], answer: 2 }, { q: "¿Quién era el DT en la Copa Libertadores 1986?", options: ["Ramón Díaz", "Marcelo Gallardo", "Américo Gallego", "Hector Veira"], answer: 3 } ],
-                dificil: [ { q: "¿Qué jugador tiene más presencias oficiales en la historia del club?", options: ["Amadeo Carrizo", "Reinaldo Merlo", "Norberto Alonso", "Ángel Labruna"], answer: 1 }, { q: "¿En qué año ganó River su única Copa Intercontinental?", options: ["1986", "1996", "1978", "1982"], answer: 0 }, { q: "¿A qué equipo europeo venció en la final Intercontinental?", options: ["Juventus", "Steaua de Bucarest", "Milan", "Real Madrid"], answer: 1 }, { q: "¿Cómo se llamaba la famosa delantera de la década del 40?", options: ["La Máquina", "La Maquinita", "Los Carasucias", "El Ballet"], answer: 0 }, { q: "¿Quién es el jugador con más títulos en la historia de River?", options: ["Ángel Labruna", "Leonardo Ponzio", "Jonatan Maidana", "Marcelo Gallardo"], answer: 1 } ],
-                socio: [ { q: "¿Quién fue el primer presidente de la historia del club?", options: ["Antonio Vespucio", "Leopoldo Bard", "Carlos Peucelle", "Hugo Santilli"], answer: 1 }, { q: "¿Cuántos goles hizo Bernabé Ferreyra en River?", options: ["105", "150", "187", "201"], answer: 2 }, { q: "¿Qué día exacto se inauguró el Estadio Monumental?", options: ["25/05/1938", "26/05/1938", "01/01/1939", "28/09/1937"], answer: 1 }, { q: "¿Cómo se llamaba el viejo estadio de River?", options: ["La Herradura", "Alvear y Tagle", "El Palacio", "Templo de Núñez"], answer: 1 }, { q: "¿Qué jugador extranjero hizo más goles en el club?", options: ["Marcelo Salas", "Radamel Falcao", "Juan Pablo Ángel", "Enzo Francescoli"], answer: 3 } ]
+                facil: [ 
+                    { q: "¿En qué estadio juega de local River Plate?", options: ["La Bombonera", "El Monumental", "El Cilindro", "El Nuevo Gasómetro"], answer: 1 }, 
+                    { q: "¿Cuáles son los colores históricos de la camiseta titular?", options: ["Blanco y Negro", "Rojo y Negro", "Blanco y Rojo", "Azul y Amarillo"], answer: 2 }, 
+                    { q: "¿En qué año se fundó el club?", options: ["1905", "1910", "1901", "1899"], answer: 2 }, 
+                    { q: "¿Qué apodo recibe popularmente el club?", options: ["El Rey de Copas", "El Millonario", "La Academia", "El Fortín"], answer: 1 }, 
+                    { q: "¿Qué clásico rival histórico tiene River Plate?", options: ["Independiente", "Racing", "Boca Juniors", "San Lorenzo"], answer: 2 },
+                    { q: "¿Qué ídolo uruguayo es conocido como 'El Príncipe'?", options: ["Rubén Paz", "Enzo Francescoli", "Antonio Alzamendi", "Sebastián Abreu"], answer: 1 },
+                    { q: "¿Cómo se llama el río que originó el nombre del club?", options: ["Río Paraná", "Río Uruguay", "Río de la Plata", "Río Matanza"], answer: 2 }
+                ],
+                medio: [ 
+                    { q: "¿Cuántas Copas Libertadores tiene River Plate?", options: ["3", "4", "5", "7"], answer: 1 }, 
+                    { q: "¿Quién es el máximo goleador histórico de River?", options: ["Ángel Labruna", "Enzo Francescoli", "Fernando Cavenaghi", "Bernabé Ferreyra"], answer: 0 }, 
+                    { q: "¿A qué equipo le ganó la final de la Copa Libertadores 2018?", options: ["Tigres", "Flamengo", "Boca Juniors", "Gremio"], answer: 2 }, 
+                    { q: "¿Qué jugador anotó el tercer gol en Madrid en 2018?", options: ["Lucas Pratto", "Juan F. Quintero", "Gonzalo Martínez", "Ignacio Scocco"], answer: 2 }, 
+                    { q: "¿Quién era el DT en la Copa Libertadores 1986?", options: ["Ramón Díaz", "Marcelo Gallardo", "Américo Gallego", "Hector Veira"], answer: 3 },
+                    { q: "¿Qué mediocampista tiene el récord de más títulos como jugador en la historia del club?", options: ["Marcelo Gallardo", "Ariel Ortega", "Leonardo Ponzio", "Norberto Alonso"], answer: 2 },
+                    { q: "¿En qué histórico año River logró conseguir un tricampeonato nacional?", options: ["1986", "1997", "2014", "1994"], answer: 1 }
+                ],
+                dificil: [ 
+                    { q: "¿Qué jugador tiene más presencias oficiales en la historia del club?", options: ["Amadeo Carrizo", "Reinaldo Merlo", "Norberto Alonso", "Ángel Labruna"], answer: 1 }, 
+                    { q: "¿En qué año ganó River su única Copa Intercontinental?", options: ["1986", "1996", "1978", "1982"], answer: 0 }, 
+                    { q: "¿A qué equipo europeo venció en la final Intercontinental?", options: ["Juventus", "Steaua de Bucarest", "Milan", "Real Madrid"], answer: 1 }, 
+                    { q: "¿Cómo se llamaba la famosa delantera de la década del 40?", options: ["La Máquina", "La Maquinita", "Los Carasucias", "El Ballet"], answer: 0 }, 
+                    { q: "¿Qué jugador de River hizo un famoso gol con una pelota naranja?", options: ["Enzo Francescoli", "Beto Alonso", "Ramón Díaz", "Oscar Ruggeri"], answer: 1 },
+                    { q: "¿A qué club le ganó River la final de la Copa Interamericana en 1987?", options: ["América (México)", "Alajuelense (Costa Rica)", "Olimpia (Honduras)", "Pumas (México)"], answer: 1 },
+                    { q: "¿Quién fue designado por la FIFA como el mejor equipo argentino del Siglo XX?", options: ["Boca Juniors", "River Plate", "Independiente", "Racing"], answer: 1 }
+                ],
+                socio: [ 
+                    { q: "¿Quién fue el primer presidente de la historia del club?", options: ["Antonio Vespucio", "Leopoldo Bard", "Carlos Peucelle", "Hugo Santilli"], answer: 1 }, 
+                    { q: "¿Cuántos goles hizo Bernabé Ferreyra en River?", options: ["105", "150", "187", "201"], answer: 2 }, 
+                    { q: "¿Qué día exacto se inauguró el Estadio Monumental?", options: ["25/05/1938", "26/05/1938", "01/01/1939", "28/09/1937"], answer: 1 }, 
+                    { q: "¿Cómo se llamaba el viejo estadio de River?", options: ["La Herradura", "Alvear y Tagle", "El Palacio", "Templo de Núñez"], answer: 1 }, 
+                    { q: "¿Cuál es el nombre oficial y completo del estadio Monumental?", options: ["Estadio Antonio Vespucio Liberti", "Estadio Monumental de Núñez", "Estadio River Plate", "Estadio Amadeo Carrizo"], answer: 0 },
+                    { q: "¿A qué histórico barrio porteño estuvo vinculado River antes de mudarse a Núñez/Belgrano?", options: ["Caballito", "La Boca", "Palermo", "San Telmo"], answer: 1 },
+                    { q: "¿En qué fecha exacta volvió River Plate a Primera División?", options: ["23 de junio de 2012", "26 de junio de 2011", "25 de mayo de 2012", "1 de enero de 2013"], answer: 0 }
+                ]
             },
             "Boca Juniors": {
-                facil: [ { q: "¿Qué apodo recibe el hincha de Boca?", options: ["Millonario", "Xeneize", "Cuervo", "Leproso"], answer: 1 }, { q: "¿En qué estadio juega de local?", options: ["El Monumental", "La Bombonera", "El Cilindro", "José Amalfitani"], answer: 1 }, { q: "¿Cuáles son sus colores tradicionales?", options: ["Rojo y Blanco", "Azul y Oro", "Celeste y Blanco", "Rojo y Negro"], answer: 1 }, { q: "¿Cuál es su clásico rival?", options: ["Independiente", "San Lorenzo", "Racing", "River Plate"], answer: 3 }, { q: "¿En qué barrio está ubicado su estadio?", options: ["La Boca", "Avellaneda", "Boedo", "Núñez"], answer: 0 } ],
-                medio: [ { q: "¿Cuántas Copas Libertadores tiene Boca?", options: ["4", "5", "6", "7"], answer: 2 }, { q: "¿Quién es el máximo goleador de la historia del club?", options: ["Martín Palermo", "Roberto Cherro", "Francisco Varallo", "Domingo Tarasconi"], answer: 0 }, { q: "¿Qué DT ganó más Copas Libertadores con el club?", options: ["Juan Carlos Lorenzo", "Carlos Bianchi", "Miguel Ángel Russo", "Alfio Basile"], answer: 1 }, { q: "¿En qué año se fundó el club?", options: ["1901", "1905", "1910", "1915"], answer: 1 }, { q: "¿Contra qué equipo ganó su primera Copa Libertadores?", options: ["Deportivo Cali", "América de Cali", "Palmeiras", "Peñarol"], answer: 0 } ],
-                dificil: [ { q: "¿Cuántas Copas Intercontinentales ganó Boca?", options: ["1", "2", "3", "4"], answer: 2 }, { q: "¿Qué jugador tiene más presencias oficiales en la historia?", options: ["Hugo Gatti", "Roberto Mouzo", "Silvio Marzolini", "Juan Román Riquelme"], answer: 1 }, { q: "¿Cuántos partidos invicto alcanzó el equipo de Carlos Bianchi?", options: ["35", "38", "40", "43"], answer: 2 }, { q: "¿Cuántos goles oficiales hizo Martín Palermo en Boca?", options: ["210", "225", "236", "248"], answer: 2 }, { q: "¿A qué equipo le ganó la Intercontinental 2003?", options: ["Bayern Munich", "Real Madrid", "Milan", "Ajax"], answer: 2 } ],
-                socio: [ { q: "¿Cuál es la fecha exacta de fundación de Boca Juniors?", options: ["1 de enero de 1905", "3 de abril de 1905", "25 de mayo de 1905", "12 de octubre de 1905"], answer: 1 }, { q: "¿En qué año realizó Boca su histórica gira europea?", options: ["1920", "1925", "1930", "1935"], answer: 1 }, { q: "¿A quién le hizo el gol Martín Palermo con muletas en 2000?", options: ["Roberto Bonano", "Germán Burgos", "Amadeo Carrizo", "Franco Armani"], answer: 0 }, { q: "¿Qué barco inspiró los colores Azul y Oro?", options: ["Un barco español", "Un barco sueco", "Un barco inglés", "Un barco italiano"], answer: 1 }, { q: "¿Quién fue el primer presidente de la historia de Boca?", options: ["Esteban Baglietto", "Juan B. Farenga", "Santiago Sana", "Alfredo Scarpati"], answer: 0 } ]
+                facil: [ 
+                    { q: "¿Qué apodo recibe el hincha de Boca?", options: ["Millonario", "Xeneize", "Cuervo", "Leproso"], answer: 1 }, 
+                    { q: "¿En qué estadio juega de local?", options: ["El Monumental", "La Bombonera", "El Cilindro", "José Amalfitani"], answer: 1 }, 
+                    { q: "¿Cuáles son sus colores tradicionales?", options: ["Rojo y Blanco", "Azul y Oro", "Celeste y Blanco", "Rojo y Negro"], answer: 1 }, 
+                    { q: "¿Cuál es su clásico rival?", options: ["Independiente", "San Lorenzo", "Racing", "River Plate"], answer: 3 }, 
+                    { q: "¿En qué barrio está ubicado su estadio?", options: ["La Boca", "Avellaneda", "Boedo", "Núñez"], answer: 0 },
+                    { q: "¿Qué ídolo histórico es popularmente conocido como 'El Último Diez'?", options: ["Diego Maradona", "Carlos Tevez", "Juan Román Riquelme", "Fernando Gago"], answer: 2 },
+                    { q: "¿Quién es conocido popularmente como 'El Titán' en Boca?", options: ["Guillermo Barros Schelotto", "Rolando Schiavi", "Martín Palermo", "Sebastián Battaglia"], answer: 2 }
+                ],
+                medio: [ 
+                    { q: "¿Cuántas Copas Libertadores tiene Boca?", options: ["4", "5", "6", "7"], answer: 2 }, 
+                    { q: "¿Quién es el máximo goleador de la historia del club?", options: ["Martín Palermo", "Roberto Cherro", "Francisco Varallo", "Domingo Tarasconi"], answer: 0 }, 
+                    { q: "¿Qué DT ganó más Copas Libertadores con el club?", options: ["Juan Carlos Lorenzo", "Carlos Bianchi", "Miguel Ángel Russo", "Alfio Basile"], answer: 1 }, 
+                    { q: "¿En qué año se fundó el club?", options: ["1901", "1905", "1910", "1915"], answer: 1 }, 
+                    { q: "¿Contra qué equipo ganó su primera Copa Libertadores (1977)?", options: ["Deportivo Cali", "América de Cali", "Palmeiras", "Cruzeiro"], answer: 3 },
+                    { q: "¿Qué jugador de Boca es el más ganador de la historia del club?", options: ["Juan Román Riquelme", "Sebastián Battaglia", "Guillermo Barros Schelotto", "Hugo Ibarra"], answer: 1 },
+                    { q: "¿En qué año se inauguró La Bombonera?", options: ["1930", "1940", "1950", "1960"], answer: 1 }
+                ],
+                dificil: [ 
+                    { q: "¿Cuántas Copas Intercontinentales ganó Boca?", options: ["1", "2", "3", "4"], answer: 2 }, 
+                    { q: "¿Qué jugador tiene más presencias oficiales en la historia?", options: ["Hugo Gatti", "Roberto Mouzo", "Silvio Marzolini", "Juan Román Riquelme"], answer: 1 }, 
+                    { q: "¿Cuántos partidos invicto alcanzó el equipo de Carlos Bianchi (récord)?", options: ["35", "38", "40", "43"], answer: 2 }, 
+                    { q: "¿Cuántos goles oficiales hizo Martín Palermo en Boca?", options: ["210", "225", "236", "248"], answer: 2 }, 
+                    { q: "¿A qué equipo le ganó la Intercontinental 2003?", options: ["Bayern Munich", "Real Madrid", "Milan", "Ajax"], answer: 2 },
+                    { q: "¿Quién era el goleador histórico de Boca antes de ser superado por Palermo?", options: ["Francisco Varallo", "Roberto Cherro", "Domingo Tarasconi", "Mario Boyé"], answer: 1 },
+                    { q: "¿En qué año ganó Boca su primera Copa Sudamericana?", options: ["2002", "2004", "2005", "2014"], answer: 1 }
+                ],
+                socio: [ 
+                    { q: "¿Cuál es la fecha exacta de fundación de Boca Juniors?", options: ["1 de enero de 1905", "3 de abril de 1905", "25 de mayo de 1905", "12 de octubre de 1905"], answer: 1 }, 
+                    { q: "¿En qué año realizó Boca su histórica y exitosa gira europea?", options: ["1920", "1925", "1930", "1935"], answer: 1 }, 
+                    { q: "¿A quién le hizo el gol Martín Palermo con muletas en 2000?", options: ["Roberto Bonano", "Germán Burgos", "Amadeo Carrizo", "Franco Armani"], answer: 0 }, 
+                    { q: "¿De qué país era el barco que inspiró los colores Azul y Oro?", options: ["España", "Suecia", "Inglaterra", "Italia"], answer: 1 }, 
+                    { q: "¿Quién fue el primer presidente de la historia de Boca?", options: ["Esteban Baglietto", "Juan B. Farenga", "Santiago Sana", "Alfredo Scarpati"], answer: 0 },
+                    { q: "¿Contra qué equipo jugó Boca el día que se inauguró La Bombonera?", options: ["River Plate", "San Lorenzo", "Independiente", "Racing"], answer: 1 },
+                    { q: "¿De qué color era la primera camiseta de Boca antes de usar azul y amarillo?", options: ["Roja", "Blanca y negra a rayas", "Celeste", "Rosa"], answer: 1 }
+                ]
             },
             "Independiente": {
-                facil: [ { q: "¿Qué apodo histórico recibe el club por sus logros internacionales?", options: ["El Fortín", "El Rey de Copas", "La Academia", "El Ciclón"], answer: 1 }, { q: "¿Cómo se llama actualmente su estadio?", options: ["Doble Visera", "Libertadores de América", "El Cilindro", "La Bombonera"], answer: 1 }, { q: "¿De qué color es su camiseta titular?", options: ["Rojo", "Azul", "Blanco", "Celeste"], answer: 0 }, { q: "¿Cuál es su clásico rival de barrio?", options: ["San Lorenzo", "Boca Juniors", "River Plate", "Racing"], answer: 3 }, { q: "¿Qué jugador histórico utilizaba la camiseta número 10 en los 70s y 80s?", options: ["Diego Maradona", "Ricardo Bochini", "Sergio Agüero", "Daniel Bertoni"], answer: 1 } ],
-                medio: [ { q: "¿Cuántas Copas Libertadores tiene Independiente?", options: ["5", "6", "7", "8"], answer: 2 }, { q: "¿Quién es el máximo goleador histórico del fútbol argentino que jugó en Independiente?", options: ["Martín Palermo", "Ángel Labruna", "Arsenio Erico", "Bernabé Ferreyra"], answer: 2 }, { q: "¿Qué DT lideró muchas de las conquistas de los años 70 y 80?", options: ["José Pastoriza", "César Menotti", "Carlos Bilardo", "Alfio Basile"], answer: 0 }, { q: "¿Entre qué años logró su récord de 4 Copas Libertadores consecutivas?", options: ["1964-1967", "1972-1975", "1982-1985", "1994-1997"], answer: 1 }, { q: "¿En qué año ganó su última Copa Sudamericana en el Maracaná?", options: ["2010", "2015", "2017", "2020"], answer: 2 } ],
-                dificil: [ { q: "¿Cuántas Copas Intercontinentales ganó Independiente?", options: ["1", "2", "3", "4"], answer: 1 }, { q: "¿Cuántos partidos oficiales jugó Ricardo Bochini en el club?", options: ["620", "655", "714", "780"], answer: 2 }, { q: "¿A qué equipo le ganó la Supercopa 1995 en el mítico 'Maracanazo'?", options: ["Flamengo", "Fluminense", "Vasco da Gama", "Botafogo"], answer: 0 }, { q: "¿A qué equipo inglés derrotó en la final Intercontinental de 1984?", options: ["Aston Villa", "Nottingham Forest", "Manchester United", "Liverpool"], answer: 3 }, { q: "¿Cuántos goles oficiales marcó Arsenio Erico en el fútbol argentino (según AFA)?", options: ["250", "275", "295", "320"], answer: 2 } ],
-                socio: [ { q: "¿Cuál es la fecha de fundación oficial de Independiente?", options: ["1 de enero de 1905", "4 de agosto de 1904", "25 de mayo de 1903", "12 de octubre de 1905"], answer: 0 }, { q: "¿Qué color tenía la primera camiseta del club antes de adoptar el rojo?", options: ["Negro", "Blanca con escudo azul", "Verde", "A rayas amarillas y negras"], answer: 1 }, { q: "¿Qué equipo europeo inspiró el uso de la camiseta roja en 1908?", options: ["Manchester United", "Liverpool", "Nottingham Forest", "Arsenal"], answer: 2 }, { q: "¿Con cuántos puntos fue campeón Independiente en el Torneo Apertura 2002?", options: ["40", "43", "45", "47"], answer: 1 }, { q: "¿Cómo se llamaba la tienda donde trabajaban los jóvenes fundadores del club?", options: ["Gath & Chaves", "Tienda A la Ciudad de Londres", "Harrods", "Tienda Los Gallegos"], answer: 1 } ]
+                facil: [ 
+                    { q: "¿Qué apodo histórico recibe el club por sus logros internacionales?", options: ["El Fortín", "El Rey de Copas", "La Academia", "El Ciclón"], answer: 1 }, 
+                    { q: "¿Cómo se llama actualmente su estadio?", options: ["Doble Visera", "Libertadores de América", "El Cilindro", "La Bombonera"], answer: 1 }, 
+                    { q: "¿De qué color es su camiseta titular?", options: ["Rojo", "Azul", "Blanco", "Celeste"], answer: 0 }, 
+                    { q: "¿Cuál es su clásico rival de barrio?", options: ["San Lorenzo", "Boca Juniors", "River Plate", "Racing"], answer: 3 }, 
+                    { q: "¿Qué jugador histórico utilizaba la camiseta número 10 en los 70s y 80s?", options: ["Diego Maradona", "Ricardo Bochini", "Sergio Agüero", "Daniel Bertoni"], answer: 1 },
+                    { q: "¿En qué ciudad y partido se encuentra el club?", options: ["La Plata", "Avellaneda", "Quilmes", "Lanús"], answer: 1 },
+                    { q: "¿Qué famoso apodo relacionado a una figura mítica tiene el club?", options: ["El León", "El Diablo", "El Dragón", "El Mago"], answer: 1 }
+                ],
+                medio: [ 
+                    { q: "¿Cuántas Copas Libertadores tiene Independiente?", options: ["5", "6", "7", "8"], answer: 2 }, 
+                    { q: "¿Quién es el máximo goleador histórico del fútbol argentino que jugó en Independiente?", options: ["Martín Palermo", "Ángel Labruna", "Arsenio Erico", "Bernabé Ferreyra"], answer: 2 }, 
+                    { q: "¿Qué DT lideró muchas de las conquistas de los años 70 y 80?", options: ["José Pastoriza", "César Menotti", "Carlos Bilardo", "Alfio Basile"], answer: 0 }, 
+                    { q: "¿Entre qué años logró su récord de 4 Copas Libertadores consecutivas?", options: ["1964-1967", "1972-1975", "1982-1985", "1994-1997"], answer: 1 }, 
+                    { q: "¿En qué año ganó su última Copa Sudamericana en el Maracaná?", options: ["2010", "2015", "2017", "2020"], answer: 2 },
+                    { q: "¿Quién era el capitán del equipo campeón de la Sudamericana 2017?", options: ["Alan Velasco", "Nicolás Tagliafico", "Ezequiel Barco", "Martín Campaña"], answer: 1 },
+                    { q: "¿Contra qué equipo ganó Independiente su primera Copa Libertadores en 1964?", options: ["Peñarol", "Santos", "Nacional", "Boca Juniors"], answer: 2 }
+                ],
+                dificil: [ 
+                    { q: "¿Cuántas Copas Intercontinentales ganó Independiente?", options: ["1", "2", "3", "4"], answer: 1 }, 
+                    { q: "¿Cuántos partidos oficiales jugó Ricardo Bochini en el club?", options: ["620", "655", "714", "780"], answer: 2 }, 
+                    { q: "¿A qué equipo le ganó la Supercopa 1995 en el mítico 'Maracanazo'?", options: ["Flamengo", "Fluminense", "Vasco da Gama", "Botafogo"], answer: 0 }, 
+                    { q: "¿A qué equipo inglés derrotó en la final Intercontinental de 1984?", options: ["Aston Villa", "Nottingham Forest", "Manchester United", "Liverpool"], answer: 3 }, 
+                    { q: "¿Cuántos goles oficiales marcó Arsenio Erico en el fútbol argentino (según AFA)?", options: ["250", "275", "295", "320"], answer: 2 },
+                    { q: "¿Quién fue el arquero ataja-penales de la Copa Libertadores 1972?", options: ["Miguel Santoro", "Faryd Mondragón", "Carlos Goyén", "Luis Islas"], answer: 0 },
+                    { q: "¿A qué equipo le ganó la final de la Copa Interamericana en 1976?", options: ["América", "Atlético Español", "Cruz Azul", "Olimpia"], answer: 1 }
+                ],
+                socio: [ 
+                    { q: "¿Cuál es la fecha de fundación oficial de Independiente?", options: ["1 de enero de 1905", "4 de agosto de 1904", "25 de mayo de 1903", "12 de octubre de 1905"], answer: 0 }, 
+                    { q: "¿Qué color tenía la primera camiseta del club antes de adoptar el rojo?", options: ["Negro", "Blanca con escudo azul", "Verde", "A rayas amarillas y negras"], answer: 1 }, 
+                    { q: "¿Qué equipo europeo inspiró el uso de la camiseta roja en 1908?", options: ["Manchester United", "Liverpool", "Nottingham Forest", "Arsenal"], answer: 2 }, 
+                    { q: "¿Con cuántos puntos fue campeón Independiente en el Torneo Apertura 2002?", options: ["40", "43", "45", "47"], answer: 1 }, 
+                    { q: "¿Cómo se llamaba la tienda donde trabajaban los jóvenes fundadores del club?", options: ["Gath & Chaves", "Tienda A la Ciudad de Londres", "Harrods", "Tienda Los Gallegos"], answer: 1 },
+                    { q: "¿Quién fue el primer presidente de la historia de Independiente?", options: ["Rosendo Degiorgi", "Aristides Langone", "Julio Grondona", "Pedro Iso"], answer: 0 },
+                    { q: "¿Qué histórico nombre acompañaba oficialmente al antiguo estadio 'La Doble Visera'?", options: ["Estadio Rey de Copas", "Estadio de Cemento", "Estadio Almirante Cordero", "Estadio Presidente Perón"], answer: 2 }
+                ]
             },
             "Racing": {
-                facil: [ { q: "¿Cuál es el apodo principal del club?", options: ["El Ciclón", "El Millonario", "La Academia", "El Diablo"], answer: 2 }, { q: "¿Cómo se lo conoce popularmente a su estadio?", options: ["El Cilindro", "La Doble Visera", "El Fortín", "La Bombonera"], answer: 0 }, { q: "¿Cuál es su clásico rival histórico?", options: ["San Lorenzo", "Boca Juniors", "Independiente", "River Plate"], answer: 2 }, { q: "¿Cómo se llama el predio de entrenamiento de Racing?", options: ["Predio Tita Mattiussi", "Villa Olímpica", "Casa Amarilla", "River Camp"], answer: 0 }, { q: "¿En qué ciudad se encuentra el club?", options: ["Buenos Aires", "Avellaneda", "Rosario", "La Plata"], answer: 1 } ],
-                medio: [ { q: "¿Por qué Racing es históricamente 'El Primer Grande'?", options: ["Por ser el primero en tener estadio", "Por el Heptacampeonato amateur", "Por ganar la primera Libertadores", "Por sus colores"], answer: 1 }, { q: "¿Qué título internacional único en Argentina ganó en 1967?", options: ["Primera Libertadores", "Primera Intercontinental", "Primera Sudamericana", "Primera Supercopa"], answer: 1 }, { q: "¿Quién fue el DT del equipo campeón de 2001?", options: ["Diego Simeone", "Eduardo Coudet", "Reinaldo 'Mostaza' Merlo", "Alfio Basile"], answer: 2 }, { q: "¿Qué frase popularizó su DT en el campeonato de 2001?", options: ["A lo Boca", "Paso a paso", "El equipo de José", "La guardia alta"], answer: 1 }, { q: "¿Cuántos torneos consecutivos ganó en el recordado heptacampeonato amateur?", options: ["5", "6", "7", "8"], answer: 2 } ],
-                dificil: [ { q: "¿A qué equipo europeo venció en la Copa Intercontinental 1967?", options: ["Manchester United", "Real Madrid", "Celtic", "Benfica"], answer: 2 }, { q: "¿Qué jugador tiene el récord de presencias en Racing?", options: ["Gustavo Costas", "Natalio Perinetti", "Agustín Cejas", "Claudio Úbeda"], answer: 1 }, { q: "¿Quién es el máximo goleador de la historia del club?", options: ["Alberto Ohaco", "Juan José Pizzuti", "Evaristo Barrera", "Omar Corbatta"], answer: 0 }, { q: "¿Contra qué equipo jugó el partido que le dio el campeonato en 2001?", options: ["River Plate", "Vélez", "Boca Juniors", "San Lorenzo"], answer: 1 }, { q: "¿En qué año se inauguró el Estadio Presidente Perón?", options: ["1945", "1950", "1955", "1960"], answer: 1 } ],
-                socio: [ { q: "¿Cuál es la fecha de fundación oficial de Racing?", options: ["25 de marzo de 1903", "1 de enero de 1905", "15 de agosto de 1904", "12 de octubre de 1903"], answer: 0 }, { q: "¿Cuál es el verdadero nombre de 'El Cilindro'?", options: ["Estadio Juan José Pizzuti", "Estadio Presidente Perón", "Estadio Ciudad de Avellaneda", "Estadio Academia"], answer: 1 }, { q: "¿Quién hizo el histórico gol contra el Celtic en Montevideo (1967)?", options: ["Humberto Maschio", "Alfio Basile", "Juan Carlos Cárdenas", "Roberto Perfumo"], answer: 2 }, { q: "¿De qué colores era la primera camiseta a cuadros de Racing?", options: ["Roja y Azul", "Celeste y Blanca", "Rosa y Celeste", "Negra y Amarilla"], answer: 2 }, { q: "¿Quién fue el primer presidente institucional de Racing Club?", options: ["Arturo Giro", "Alejandro Carbone", "Pedro Werner", "Luis Carbone"], answer: 0 } ]
+                facil: [ 
+                    { q: "¿Cuál es el apodo principal del club?", options: ["El Ciclón", "El Millonario", "La Academia", "El Diablo"], answer: 2 }, 
+                    { q: "¿Cómo se lo conoce popularmente a su estadio?", options: ["El Cilindro", "La Doble Visera", "El Fortín", "La Bombonera"], answer: 0 }, 
+                    { q: "¿Cuál es su clásico rival histórico?", options: ["San Lorenzo", "Boca Juniors", "Independiente", "River Plate"], answer: 2 }, 
+                    { q: "¿Cómo se llama el predio de entrenamiento de Racing?", options: ["Predio Tita Mattiussi", "Villa Olímpica", "Casa Amarilla", "River Camp"], answer: 0 }, 
+                    { q: "¿En qué ciudad se encuentra el club?", options: ["Buenos Aires", "Avellaneda", "Rosario", "La Plata"], answer: 1 },
+                    { q: "¿De qué colores es su camiseta tradicional?", options: ["Rojo y Blanco", "Celeste y Blanco", "Azul y Oro", "Negro y Blanco"], answer: 1 },
+                    { q: "¿A qué famoso actor argentino se lo asocia como hincha fanático?", options: ["Ricardo Darín", "Guillermo Francella", "Adrián Suar", "Diego Peretti"], answer: 1 }
+                ],
+                medio: [ 
+                    { q: "¿Por qué Racing es históricamente 'El Primer Grande'?", options: ["Por ser el primero en tener estadio", "Por el Heptacampeonato amateur", "Por ganar la primera Libertadores", "Por sus colores"], answer: 1 }, 
+                    { q: "¿Qué título internacional único en Argentina ganó en 1967?", options: ["Primera Libertadores", "Primera Intercontinental", "Primera Sudamericana", "Primera Supercopa"], answer: 1 }, 
+                    { q: "¿Quién fue el DT del equipo campeón de 2001?", options: ["Diego Simeone", "Eduardo Coudet", "Reinaldo 'Mostaza' Merlo", "Alfio Basile"], answer: 2 }, 
+                    { q: "¿Qué frase popularizó su DT en el campeonato de 2001?", options: ["A lo Boca", "Paso a paso", "El equipo de José", "La guardia alta"], answer: 1 }, 
+                    { q: "¿Cuántos torneos consecutivos ganó en el recordado heptacampeonato amateur?", options: ["5", "6", "7", "8"], answer: 2 },
+                    { q: "¿Qué ídolo regresó al club y lo sacó campeón en 2014?", options: ["Lisandro López", "Diego Milito", "Lautaro Martínez", "Claudio Úbeda"], answer: 1 },
+                    { q: "¿A quién venció en la final del Trofeo de Campeones 2022?", options: ["Boca Juniors", "River Plate", "Tigre", "Independiente"], answer: 0 }
+                ],
+                dificil: [ 
+                    { q: "¿A qué equipo europeo venció en la Copa Intercontinental 1967?", options: ["Manchester United", "Real Madrid", "Celtic", "Benfica"], answer: 2 }, 
+                    { q: "¿Qué jugador tiene el récord de presencias en Racing?", options: ["Gustavo Costas", "Natalio Perinetti", "Agustín Cejas", "Claudio Úbeda"], answer: 1 }, 
+                    { q: "¿Quién es el máximo goleador de la historia del club?", options: ["Alberto Ohaco", "Juan José Pizzuti", "Evaristo Barrera", "Omar Corbatta"], answer: 0 }, 
+                    { q: "¿Contra qué equipo jugó el partido que le dio el campeonato en 2001?", options: ["River Plate", "Vélez", "Boca Juniors", "San Lorenzo"], answer: 1 }, 
+                    { q: "¿En qué año se inauguró el Estadio Presidente Perón?", options: ["1945", "1950", "1955", "1960"], answer: 1 },
+                    { q: "¿Quién anotó el gol decisivo frente a Cruzeiro en la Supercopa 1988?", options: ["Rubén Paz", "Omar Catalán", "Toti Iglesias", "Néstor Fabbri"], answer: 1 },
+                    { q: "¿Qué histórico jugador fue bautizado 'El Marqués'?", options: ["Humberto Maschio", "Rubén Sosa", "Roberto Perfumo", "Rubén Capria"], answer: 2 }
+                ],
+                socio: [ 
+                    { q: "¿Cuál es la fecha de fundación oficial de Racing?", options: ["25 de marzo de 1903", "1 de enero de 1905", "15 de agosto de 1904", "12 de octubre de 1903"], answer: 0 }, 
+                    { q: "¿Cuál es el verdadero nombre de 'El Cilindro'?", options: ["Estadio Juan José Pizzuti", "Estadio Presidente Perón", "Estadio Ciudad de Avellaneda", "Estadio Academia"], answer: 1 }, 
+                    { q: "¿Quién hizo el histórico gol contra el Celtic en Montevideo (1967)?", options: ["Humberto Maschio", "Alfio Basile", "Juan Carlos Cárdenas", "Roberto Perfumo"], answer: 2 }, 
+                    { q: "¿De qué colores era la primera camiseta de Racing antes del celeste y blanco?", options: ["Roja y Azul", "Celeste y Blanca", "A cuadros negros y amarillos", "Blanca pura"], answer: 3 }, 
+                    { q: "¿Quién fue el primer presidente institucional de Racing Club?", options: ["Arturo Giro", "Alejandro Carbone", "Pedro Werner", "Luis Carbone"], answer: 0 },
+                    { q: "¿Quién compuso la marcha oficial de Racing Club?", options: ["Carlos Gardel", "Vicente Scaglione", "Aníbal Troilo", "Astor Piazzolla"], answer: 1 },
+                    { q: "¿En qué barrio exacto se fundó originalmente Racing Club antes de instalarse definitivamente?", options: ["La Boca", "Barracas al Sur (Avellaneda)", "Retiro", "Boedo"], answer: 1 }
+                ]
             },
             "San Lorenzo": {
-                facil: [ { q: "¿Cuál es el apodo más común de San Lorenzo?", options: ["El Ciclón", "El Fortín", "El Pincharrata", "El Canalla"], answer: 0 }, { q: "¿Cómo se llama su estadio actual?", options: ["El Palacio", "El Nuevo Gasómetro", "El José Amalfitani", "El Viaducto"], answer: 1 }, { q: "¿Cuál es su clásico rival de barrio?", options: ["Boca Juniors", "Vélez Sarsfield", "Huracán", "Ferro"], answer: 2 }, { q: "¿Qué Papa es hincha fanático y socio del club?", options: ["Juan Pablo II", "Benedicto XVI", "Francisco", "Pío XII"], answer: 2 }, { q: "¿De qué colores es la camiseta tradicional?", options: ["Azul y Grana", "Rojo y Blanco", "Celeste y Blanco", "Negro y Blanco"], answer: 0 } ],
-                medio: [ { q: "¿En qué año ganó su única Copa Libertadores de América?", options: ["2010", "2012", "2014", "2016"], answer: 2 }, { q: "¿Quién es el máximo goleador de la historia del club?", options: ["Héctor Scotta", "José Sanfilippo", "Bernardo Romeo", "Leandro Romagnoli"], answer: 1 }, { q: "¿Cómo se llamaba su histórico estadio de Avenida La Plata?", options: ["El Gasómetro", "La Doble Visera", "El Templo", "El Palacio"], answer: 0 }, { q: "¿En qué torneo logró el récord de ser el primer campeón invicto (1968)?", options: ["Torneo Nacional", "Torneo Metropolitano", "Campeonato de Primera", "Copa Argentina"], answer: 1 }, { q: "¿A qué equipo enfrentó en el Mundial de Clubes 2014?", options: ["Barcelona", "Real Madrid", "Bayern Munich", "Chelsea"], answer: 1 } ],
-                dificil: [ { q: "¿Quién hizo el gol de penal en la final de la Libertadores 2014?", options: ["Leandro Romagnoli", "Mauro Matos", "Néstor Ortigoza", "Julio Buffarini"], answer: 2 }, { q: "¿A qué equipo le ganó la final de la Copa Mercosur 2001?", options: ["Palmeiras", "Flamengo", "Corinthians", "Vasco da Gama"], answer: 1 }, { q: "¿Qué jugador tiene el récord de más partidos jugados en el club?", options: ["Roberto Telch", "Leandro Romagnoli", "Sergio Villar", "José Albrecht"], answer: 2 }, { q: "¿Cuántos goles hizo Héctor Scotta en el año 1975?", options: ["40", "50", "60", "70"], answer: 2 }, { q: "¿En qué año se fundó el club?", options: ["1905", "1908", "1910", "1912"], answer: 1 } ],
-                socio: [ { q: "¿Cuál es la fecha de fundación del club?", options: ["1 de abril de 1908", "25 de mayo de 1905", "1 de enero de 1910", "12 de octubre de 1908"], answer: 0 }, { q: "¿Quién fue el sacerdote que impulsó la fundación del club?", options: ["Padre Mario", "Padre Lorenzo Massa", "Padre Mugica", "Padre Bergoglio"], answer: 1 }, { q: "¿Cómo se lo conocía al brillante equipo de 1968?", options: ["La Máquina", "Los Matadores", "Los Carasucias", "Los Camboyanos"], answer: 1 }, { q: "¿En qué año se jugó el último partido en el Viejo Gasómetro?", options: ["1979", "1981", "1983", "1993"], answer: 0 }, { q: "¿Cuál fue el resultado de la final de la Libertadores 2014 contra Nacional?", options: ["1-0 global", "2-1 global", "3-2 global", "3-0 global"], answer: 0 } ]
+                facil: [ 
+                    { q: "¿Cuál es el apodo más común de San Lorenzo?", options: ["El Ciclón", "El Fortín", "El Pincharrata", "El Canalla"], answer: 0 }, 
+                    { q: "¿Cómo se llama su estadio actual?", options: ["El Palacio", "El Nuevo Gasómetro", "El José Amalfitani", "El Viaducto"], answer: 1 }, 
+                    { q: "¿Cuál es su clásico rival de barrio?", options: ["Boca Juniors", "Vélez Sarsfield", "Huracán", "Ferro"], answer: 2 }, 
+                    { q: "¿Qué Papa es hincha fanático y socio del club?", options: ["Juan Pablo II", "Benedicto XVI", "Francisco", "Pío XII"], answer: 2 }, 
+                    { q: "¿De qué colores es la camiseta tradicional?", options: ["Azul y Grana", "Rojo y Blanco", "Celeste y Blanco", "Negro y Blanco"], answer: 0 },
+                    { q: "¿En qué barrio tradicional porteño nació el club?", options: ["Palermo", "Boedo", "Flores", "La Paternal"], answer: 1 },
+                    { q: "¿Qué actor internacional apoya públicamente al club?", options: ["Viggo Mortensen", "Leonardo DiCaprio", "Brad Pitt", "Johnny Depp"], answer: 0 }
+                ],
+                medio: [ 
+                    { q: "¿En qué año ganó su única Copa Libertadores de América?", options: ["2010", "2012", "2014", "2016"], answer: 2 }, 
+                    { q: "¿Quién es el máximo goleador de la historia del club?", options: ["Héctor Scotta", "José Sanfilippo", "Bernardo Romeo", "Leandro Romagnoli"], answer: 1 }, 
+                    { q: "¿Cómo se llamaba su histórico estadio de Avenida La Plata?", options: ["El Gasómetro", "La Doble Visera", "El Templo", "El Palacio"], answer: 0 }, 
+                    { q: "¿En qué torneo logró el récord de ser el primer campeón invicto (1968)?", options: ["Torneo Nacional", "Torneo Metropolitano", "Campeonato de Primera", "Copa Argentina"], answer: 1 }, 
+                    { q: "¿A qué equipo enfrentó en la final del Mundial de Clubes 2014?", options: ["Barcelona", "Real Madrid", "Bayern Munich", "Chelsea"], answer: 1 },
+                    { q: "¿Qué ídolo apodado 'Pipi' es considerado uno de los mayores emblemas del club?", options: ["Leandro Romagnoli", "Néstor Ortigoza", "Pablo Barrientos", "Héctor Villalba"], answer: 0 },
+                    { q: "¿A quién venció en la final de la Copa Sudamericana 2002?", options: ["Pachuca", "Atlético Nacional", "Bolívar", "Colo Colo"], answer: 1 }
+                ],
+                dificil: [ 
+                    { q: "¿Quién hizo el gol de penal en la final de la Libertadores 2014?", options: ["Leandro Romagnoli", "Mauro Matos", "Néstor Ortigoza", "Julio Buffarini"], answer: 2 }, 
+                    { q: "¿A qué equipo le ganó la final de la Copa Mercosur 2001?", options: ["Palmeiras", "Flamengo", "Corinthians", "Vasco da Gama"], answer: 1 }, 
+                    { q: "¿Qué jugador tiene el récord de más partidos jugados en el club?", options: ["Roberto Telch", "Leandro Romagnoli", "Sergio Villar", "José Albrecht"], answer: 2 }, 
+                    { q: "¿Cuántos goles hizo Héctor Scotta en un solo año calendario (récord en 1975)?", options: ["40", "50", "60", "70"], answer: 2 }, 
+                    { q: "¿En qué año logró ser bicampeón de primera división?", options: ["1959", "1972", "1995", "2001"], answer: 1 },
+                    { q: "¿Cómo se llamaba el emblemático equipo campeón invicto de 1972?", options: ["La Máquina", "Los Camboyanos", "Los Matadores", "Los Carasucias"], answer: 2 },
+                    { q: "¿Qué jugador histórico tiene el apodo de 'El Nene'?", options: ["José Sanfilippo", "Héctor Scotta", "Narciso Doval", "Walter Perazzo"], answer: 0 }
+                ],
+                socio: [ 
+                    { q: "¿Cuál es la fecha de fundación del club?", options: ["1 de abril de 1908", "25 de mayo de 1905", "1 de enero de 1910", "12 de octubre de 1908"], answer: 0 }, 
+                    { q: "¿Quién fue el sacerdote que impulsó la fundación del club?", options: ["Padre Mario", "Padre Lorenzo Massa", "Padre Mugica", "Padre Bergoglio"], answer: 1 }, 
+                    { q: "¿A qué epopeya se le conoce como 'La vuelta a Boedo'?", options: ["Ganar la Libertadores", "Recuperar los terrenos de Av. La Plata", "Subir a Primera A", "Comprar el Nuevo Gasómetro"], answer: 1 }, 
+                    { q: "¿En qué año se jugó el último partido en el Viejo Gasómetro?", options: ["1979", "1981", "1983", "1993"], answer: 0 }, 
+                    { q: "¿Cuál fue el resultado de la final de la Libertadores 2014 contra Nacional de Paraguay (ida y vuelta global)?", options: ["1-0 global", "2-1 global", "3-2 global", "3-0 global"], answer: 1 },
+                    { q: "¿Qué nombre recibe el equipo heroico de fines de los 80 sin recursos económicos y sin cancha?", options: ["Los Matadores", "Los Camboyanos", "Los Forzosos", "Los Guerreros"], answer: 1 },
+                    { q: "¿Cuál era el nombre original pensado por los jóvenes fundadores antes de San Lorenzo?", options: ["Los Forzosos de Almagro", "Estrella de Boedo", "Ciclón Porteño", "Atlético Boedo"], answer: 0 }
+                ]
             },
             "Huracán": {
-                facil: [ { q: "¿Cuál es el apodo principal del club?", options: ["El Ciclón", "El Globo / Quemeros", "El Fortín", "Los Bichos"], answer: 1 }, { q: "¿Cómo se llama el estadio de Huracán?", options: ["José Amalfitani", "Nuevo Gasómetro", "Tomás Adolfo Ducó", "Diego A. Maradona"], answer: 2 }, { q: "¿Cuáles son sus colores tradicionales?", options: ["Rojo y Blanco", "Blanco y Granate", "Blanco y Rojo", "Blanco con vivo Rojo"], answer: 2 }, { q: "¿Cuál es su clásico rival?", options: ["San Lorenzo", "Vélez Sarsfield", "Boca Juniors", "Argentinos Juniors"], answer: 0 }, { q: "¿A qué histórico barrio porteño pertenece?", options: ["Boedo", "Parque Patricios", "La Paternal", "Mataderos"], answer: 1 } ],
-                medio: [ { q: "¿En qué año Huracán salió Campeón del emblemático Torneo Metropolitano?", options: ["1967", "1973", "1978", "1981"], answer: 1 }, { q: "¿Quién fue el DT de ese histórico equipo campeón?", options: ["César Luis Menotti", "Ángel Cappa", "Carlos Babington", "Alfio Basile"], answer: 0 }, { q: "¿Qué copa nacional conquistó en el año 2014?", options: ["Copa Argentina", "Copa de la Liga", "Supercopa Argentina", "Copa Centenario"], answer: 0 }, { q: "¿Qué jugador histórico es considerado el mayor ídolo y símbolo del club?", options: ["René Houseman", "Herminio Masantonio", "Miguel Brindisi", "Javier Pastore"], answer: 1 }, { q: "¿Quién fue el arquero figura del Huracán campeón de 1973?", options: ["Héctor Roganti", "Nery Pumpido", "Ubaldo Fillol", "Carlos Gatti"], answer: 0 } ],
-                dificil: [ { q: "¿Quién es el máximo goleador histórico de Huracán?", options: ["Emilio Baldonedo", "René Houseman", "Herminio Masantonio", "Tomás Ducó"], answer: 2 }, { q: "¿A qué equipo venció en la final de la Copa Argentina 2014?", options: ["River Plate", "Boca Juniors", "Rosario Central", "San Lorenzo"], answer: 2 }, { q: "¿A qué instancia internacional máxima llegó en la Copa Sudamericana 2015?", options: ["Semifinales", "Final", "Cuartos de final", "Campeón"], answer: 1 }, { q: "¿Qué jugador histórico tiene el récord de mayor cantidad de presencias en el club?", options: ["Jorge Alberti", "Miguel Brindisi", "Carlos Babington", "Roque Avallay"], answer: 0 }, { q: "¿En qué año descendió por última vez a la B Nacional antes de retornar?", options: ["2003", "2007", "2011", "2013"], answer: 2 } ],
-                socio: [ { q: "¿En qué año se fundó oficialmente el Club Atlético Huracán?", options: ["1 de enero de 1908", "1 de noviembre de 1908", "25 de mayo de 1905", "12 de octubre de 1908"], answer: 1 }, { q: "¿De quién tomó su nombre el club 'Huracán'?", options: ["Un viento fuerte de la zona", "El globo aerostático de Jorge Newbery", "Un barco", "Una tienda de Parque Patricios"], answer: 1 }, { q: "¿Qué cargo ocupó el histórico Tomás Adolfo Ducó además de jugador?", options: ["Sacerdote", "Presidente del Club y Militar", "Gobernador", "Médico"], answer: 1 }, { q: "¿Cuántos títulos de Primera División en la era Amateur posee Huracán?", options: ["2", "3", "4", "5"], answer: 2 }, { q: "¿Cuál fue el primer presidente de la historia del club?", options: ["José Wuille Bille", "Tomás Ducó", "Jorge Newbery", "Lorenzo Mazzucco"], answer: 0 } ]
+                facil: [ 
+                    { q: "¿Cuál es el apodo principal del club?", options: ["El Ciclón", "El Globo / Quemeros", "El Fortín", "Los Bichos"], answer: 1 }, 
+                    { q: "¿Cómo se llama el estadio de Huracán?", options: ["José Amalfitani", "Nuevo Gasómetro", "Tomás Adolfo Ducó", "Diego A. Maradona"], answer: 2 }, 
+                    { q: "¿Cuáles son sus colores tradicionales?", options: ["Rojo y Blanco", "Blanco y Granate", "Blanco y Rojo", "Blanco con vivo Rojo"], answer: 2 }, 
+                    { q: "¿Cuál es su clásico rival?", options: ["San Lorenzo", "Vélez Sarsfield", "Boca Juniors", "Argentinos Juniors"], answer: 0 }, 
+                    { q: "¿A qué histórico barrio porteño pertenece?", options: ["Boedo", "Parque Patricios", "La Paternal", "Mataderos"], answer: 1 },
+                    { q: "¿Qué elemento es el símbolo principal del escudo del club?", options: ["Un águila", "Un globo aerostático", "Una estrella", "Un faro"], answer: 1 },
+                    { q: "¿Qué apodo recibe popularmente su estadio?", options: ["La Quema", "El Palacio", "El Cilindro", "La Catedral"], answer: 1 }
+                ],
+                medio: [ 
+                    { q: "¿En qué año Huracán salió Campeón del emblemático Torneo Metropolitano?", options: ["1967", "1973", "1978", "1981"], answer: 1 }, 
+                    { q: "¿Quién fue el DT de ese histórico equipo campeón en 1973?", options: ["César Luis Menotti", "Ángel Cappa", "Carlos Babington", "Alfio Basile"], answer: 0 }, 
+                    { q: "¿Qué copa nacional conquistó en el año 2014?", options: ["Copa Argentina", "Copa de la Liga", "Supercopa Argentina", "Copa Centenario"], answer: 0 }, 
+                    { q: "¿Qué jugador histórico es considerado el mayor ídolo y símbolo del club apodado 'El Loco'?", options: ["Herminio Masantonio", "René Houseman", "Miguel Brindisi", "Javier Pastore"], answer: 1 }, 
+                    { q: "¿Quién fue el arquero figura del Huracán campeón de 1973?", options: ["Héctor Roganti", "Nery Pumpido", "Ubaldo Fillol", "Carlos Gatti"], answer: 0 },
+                    { q: "¿Qué recordado DT lideró el equipo del 'Tiki Tiki' en el Clausura 2009?", options: ["César Menotti", "Antonio Mohamed", "Ángel Cappa", "Gustavo Alfaro"], answer: 2 },
+                    { q: "¿A quién le ganó la final de la Supercopa Argentina jugada en 2015?", options: ["Boca Juniors", "River Plate", "Rosario Central", "San Lorenzo"], answer: 1 }
+                ],
+                dificil: [ 
+                    { q: "¿Quién es el máximo goleador histórico de Huracán?", options: ["Emilio Baldonedo", "René Houseman", "Herminio Masantonio", "Tomás Ducó"], answer: 2 }, 
+                    { q: "¿A qué equipo venció en la final de la Copa Argentina 2014 por penales?", options: ["River Plate", "Boca Juniors", "Rosario Central", "San Lorenzo"], answer: 2 }, 
+                    { q: "¿A qué instancia internacional máxima llegó en la Copa Sudamericana 2015?", options: ["Semifinales", "Final", "Cuartos de final", "Campeón"], answer: 1 }, 
+                    { q: "¿Qué jugador histórico tiene el récord de mayor cantidad de presencias en el club?", options: ["Jorge Alberti", "Miguel Brindisi", "Carlos Babington", "Roque Avallay"], answer: 0 }, 
+                    { q: "¿En qué año descendió por última vez a la B Nacional antes de retornar en 2014?", options: ["2003", "2007", "2011", "2013"], answer: 2 },
+                    { q: "¿Quién fue el arquero ataja penales clave en la consagración de la Copa Argentina 2014?", options: ["Marcos Díaz", "Gastón Monzón", "Hugo Barrientos", "Marcelo Barovero"], answer: 0 },
+                    { q: "¿Qué histórico jugador de Huracán fue apodado 'El Inglés'?", options: ["Miguel Brindisi", "Carlos Babington", "Roque Avallay", "René Houseman"], answer: 1 }
+                ],
+                socio: [ 
+                    { q: "¿En qué año se fundó oficialmente el Club Atlético Huracán?", options: ["1 de enero de 1908", "1 de noviembre de 1908", "25 de mayo de 1905", "12 de octubre de 1908"], answer: 1 }, 
+                    { q: "¿De quién tomó su nombre el club 'Huracán'?", options: ["Un viento fuerte de la zona", "El globo aerostático de Jorge Newbery", "Un barco", "Una tienda de Parque Patricios"], answer: 1 }, 
+                    { q: "¿Qué cargo ocupó el histórico Tomás Adolfo Ducó además de jugador y presidente?", options: ["Sacerdote", "Militar (Teniente Coronel)", "Gobernador", "Médico"], answer: 1 }, 
+                    { q: "¿Cuántos títulos de Primera División en la era Amateur posee Huracán?", options: ["2", "3", "4", "5"], answer: 2 }, 
+                    { q: "¿Cuál fue el primer presidente de la historia del club?", options: ["José Wuille Bille", "Tomás Ducó", "Jorge Newbery", "Lorenzo Mazzucco"], answer: 0 },
+                    { q: "¿Qué lema figuraba en el acta original de fundación del club?", options: ["El barrio es grande", "Huracán al cielo", "El sexto grande", "Gloria y Honor"], answer: 1 },
+                    { q: "¿En qué año se inauguró formalmente el actual Palacio Tomás Adolfo Ducó?", options: ["1947", "1949", "1951", "1955"], answer: 1 }
+                ]
             }
         };
 
-        // === VARIABLES DEL JUEGO ===
-        const levels = ["facil", "medio", "dificil", "socio"];
-        let currentLevelIndex = 0;
-        let correctAnswers = 0;
-        const requiredToAdvance = 5;
-        let availableQuestions = {};
-        let currentQuestionObj = null;
-        let currentOptionsMap = [];
-        let isChicana = false; 
-        let chicanaAprobada = false;
-
+        // === LÓGICA DEL JUEGO ===
         function setClubBackground(club) {
             const gameScreen = document.getElementById('game-screen');
             gameScreen.className = 'screen active'; 
@@ -983,7 +1199,8 @@
                 facil: [...clubQuestions.facil],
                 medio: [...clubQuestions.medio],
                 dificil: [...clubQuestions.dificil],
-                socio: [...clubQuestions.socio]
+                socio: [...clubQuestions.socio],
+                chicana: [...chicanas[selectedClub]] 
             };
 
             currentLevelIndex = 0;
@@ -1015,6 +1232,7 @@
             const selectedClub = clubs[currentClubIndex];
             const currentDifficulty = levels[currentLevelIndex];
             
+            // Recargamos las preguntas de ese nivel específico (pero NO las chicanas para que no repita obligatoriamente si falló)
             availableQuestions[currentDifficulty] = [...database[selectedClub][currentDifficulty]];
             
             correctAnswers = 0;
@@ -1048,7 +1266,11 @@
             
             if (currentDifficulty === 'socio' && !chicanaAprobada) {
                 isChicana = true;
-                currentQuestionObj = chicanas[selectedClub];
+                const pool = availableQuestions.chicana;
+                const randomIndex = Math.floor(Math.random() * pool.length);
+                currentQuestionObj = pool[randomIndex];
+                pool.splice(randomIndex, 1);
+                
                 gameScreen.classList.add('chicana-dark-mode');
                 document.getElementById('level-title').innerText = "CHICANA";
                 document.getElementById('level-title').style.color = "#ff00ff";
@@ -1185,7 +1407,6 @@
             document.getElementById('options-container').style.display = 'none';
             document.getElementById('status-container').style.opacity = '0'; 
             
-            // Guardar en Firebase en lugar de localStorage
             if (typeof window.fbSaveScore === 'function') {
                 window.fbSaveScore(currentPlayer, clubName, gameTimer);
             }
