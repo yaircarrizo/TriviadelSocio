@@ -778,6 +778,19 @@
         let timerInterval;
         let feHinchaUsed = false;
 
+        // ==========================================
+        // VARIABLES DE ESTADO DEL JUEGO (CORREGIDAS)
+        // ==========================================
+        const levels = ['facil', 'medio', 'dificil', 'socio'];
+        const requiredToAdvance = 5;
+        let currentLevelIndex = 0;
+        let correctAnswers = 0;
+        let availableQuestions = {};
+        let currentQuestionObj = null;
+        let currentOptionsMap = [];
+        let isChicana = false;
+        let chicanaAprobada = false;
+
         window.addEventListener('DOMContentLoaded', () => {
             if (localStorage.getItem('vf_player')) {
                 document.getElementById('username-input').value = currentPlayer;
@@ -938,7 +951,7 @@
                 { q: "Pregunta chicana:\n¿Qué supermercado construyó su sucursal donde antiguamente estaba el Viejo Gasómetro?", options: ["Coto", "Jumbo", "Carrefour", "Walmart"], answer: 2 }
             ],
             "Huracán": [
-                { q: "Pregunta chicana:\n¿Cuántas veces descendió a la B el club de Parque Patricios a lo largo de su historia?", options: ["1 vez", "2 veces", "3 veces", "4 veces"], answer: 3 },
+                { q: "Pregunta chicana:\n¿Cuántas veces descendió a la B el club de Parque Patricios a lo largo de sua historia?", options: ["1 vez", "2 veces", "3 veces", "4 veces"], answer: 3 },
                 { q: "Pregunta chicana:\n¿Qué estatus histórico se autoproclaman a pesar de las burlas sobre su falta de copas modernas?", options: ["El Primer Grande", "El Sexto Grande", "El Rey de Copas", "El Capo del Sur"], answer: 1 },
                 { q: "Pregunta chicana:\n¿Cuántos campeonatos de Primera División ganó Huracán en la era del profesionalismo (desde 1931)?", options: ["1 (Torneo Metropolitano 1973)", "2", "3", "5"], answer: 0 },
                 { q: "Pregunta chicana:\n¿Qué club tiene una paternidad histórica abrumadora (amplia diferencia de partidos) sobre Huracán?", options: ["Boca Juniors", "Independiente", "San Lorenzo", "Racing"], answer: 2 },
@@ -1232,7 +1245,6 @@
             const selectedClub = clubs[currentClubIndex];
             const currentDifficulty = levels[currentLevelIndex];
             
-            // Recargamos las preguntas de ese nivel específico (pero NO las chicanas para que no repita obligatoriamente si falló)
             availableQuestions[currentDifficulty] = [...database[selectedClub][currentDifficulty]];
             
             correctAnswers = 0;
