@@ -218,6 +218,8 @@
 
         .bg-lanus { background-color: #800000; }
         .bg-banfield { background: repeating-linear-gradient(90deg, #006400, #006400 50px, #ffffff 50px, #ffffff 100px); }
+        .bg-estudiantes { background: linear-gradient(135deg, #ffffff 45%, #d2001c 45%, #d2001c 55%, #ffffff 55%); }
+        .bg-gimnasia { background: repeating-linear-gradient(90deg, #001f5c, #001f5c 40px, #ffffff 40px, #ffffff 80px); }
 
         .chicana-dark-mode::after {
             content: '';
@@ -285,6 +287,35 @@
             border-color: #ffffff;
             transform: scale(1.05);
             box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+
+        .sidebar-footer-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid #222;
+        }
+
+        .sidebar-footer-nav button {
+            background: transparent;
+            border: 2px solid #222;
+            color: #666;
+            padding: 12px 25px;
+            font-size: 1rem;
+            text-align: center;
+            border-radius: 50px;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .sidebar-footer-nav button .soon-tag {
+            display: block;
+            font-size: 0.65rem;
+            color: #555;
+            margin-top: 3px;
+            letter-spacing: 0.5px;
         }
 
         /* === PANTALLA DE LOGIN INICIAL === */
@@ -423,7 +454,17 @@
         .pop-anim { animation: popIn 0.4s forwards; }
 
         /* === PANTALLAS: VITRINA Y POSICIONES === */
-        #vitrina-screen, #leaderboard-screen {
+        #vitrina-screen {
+            background:
+                radial-gradient(ellipse at top, rgba(255, 215, 0, 0.10), transparent 55%),
+                repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 90px),
+                repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 90px),
+                #4a0000;
+            padding: 100px 40px 40px 40px;
+            overflow-y: auto;
+        }
+
+        #leaderboard-screen {
             background-color: #4a0000; 
             padding: 100px 40px 40px 40px;
             overflow-y: auto;
@@ -434,6 +475,11 @@
             font-size: 2.5rem;
             margin-bottom: 40px;
             text-shadow: 2px 2px 4px #000;
+        }
+
+        .vitrina-title {
+            color: #ffd700;
+            text-shadow: 0 0 12px rgba(255, 215, 0, 0.55), 2px 2px 4px #000;
         }
 
         .vitrina-grid {
@@ -465,13 +511,24 @@
             transition: all 0.5s ease;
             opacity: 0.2; 
             filter: grayscale(100%);
+            position: relative;
         }
 
         .socio-card.unlocked {
             opacity: 1;
             filter: grayscale(0%);
-            background: rgba(255,255,255,0.15);
-            box-shadow: 0 0 15px rgba(255,255,255,0.3);
+            background: rgba(255, 215, 0, 0.12);
+            border-color: #ffd700;
+            box-shadow: 0 0 18px rgba(255, 215, 0, 0.5);
+        }
+
+        .socio-card.unlocked::after {
+            content: '⭐';
+            position: absolute;
+            top: -12px;
+            right: -10px;
+            font-size: 1.1rem;
+            filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.9));
         }
 
         .card-photo { width: 35px; height: 45px; background-color: #ffffff; border-radius: 4px; }
@@ -715,6 +772,10 @@
             <button id="nav-vitrina" onclick="switchScreen('vitrina-screen', this); toggleSidebar();">Vitrina</button>
             <button id="nav-posiciones" onclick="switchScreen('leaderboard-screen', this); toggleSidebar(); loadLeaderboardFromFirebase();">Posiciones</button>
         </nav>
+        <div class="sidebar-footer-nav">
+            <button disabled>Acerca de...<span class="soon-tag">Próximamente</span></button>
+            <button disabled>Configuración<span class="soon-tag">Próximamente</span></button>
+        </div>
     </aside>
 
     <div id="login-screen" class="screen active">
@@ -743,7 +804,7 @@
     </main>
 
     <main id="vitrina-screen" class="screen">
-        <h1 class="screen-title">Tu Vitrina de Socios</h1>
+        <h1 class="screen-title vitrina-title">⭐ Tu Vitrina de Socios ⭐</h1>
         <div class="vitrina-grid" id="vitrina-grid"></div>
     </main>
 
@@ -795,14 +856,14 @@
         let currentPlayer = localStorage.getItem('vf_player') || "Socio Anónimo";
         
         // SE AÑADIERON LANÚS Y BANFIELD A LA LISTA
-        const clubs = ["River Plate", "Boca Juniors", "Independiente", "Racing", "San Lorenzo", "Huracán", "Lanús", "Banfield"];
+        const clubs = ["River Plate", "Boca Juniors", "Independiente", "Racing", "San Lorenzo", "Huracán", "Lanús", "Banfield", "Estudiantes (LP)", "Gimnasia (LP)"];
         let currentClubIndex = 0;
         
         // SE AÑADIERON LANÚS Y BANFIELD AL ESTADO GUARDADO DE LA VITRINA
         let unlockedClubs = JSON.parse(localStorage.getItem('vf_unlocked')) || {
             "River Plate": false, "Boca Juniors": false, "Independiente": false,
             "Racing": false, "San Lorenzo": false, "Huracán": false,
-            "Lanús": false, "Banfield": false
+            "Lanús": false, "Banfield": false, "Estudiantes (LP)": false, "Gimnasia (LP)": false
         };
 
         let leaderboardData = [];
@@ -942,7 +1003,7 @@
             const playBtn = document.getElementById('play-btn');
             const currentSelectedClub = clubs[currentClubIndex];
             
-            if (currentSelectedClub === "Lanús" || currentSelectedClub === "Banfield") {
+            if (currentSelectedClub === "Lanús" || currentSelectedClub === "Banfield" || currentSelectedClub === "Estudiantes (LP)" || currentSelectedClub === "Gimnasia (LP)") {
                 playBtn.disabled = true;
                 playBtn.innerText = "Próximamente";
             } else {
@@ -1008,7 +1069,25 @@
                     { q: "¿Qué apodo recibe popularmente el club?", options: ["El Rey de Copas", "El Millonario", "La Academia", "El Fortín"], answer: 1 }, 
                     { q: "¿Qué clásico rival histórico tiene River Plate?", options: ["Independiente", "Racing", "Boca Juniors", "San Lorenzo"], answer: 2 },
                     { q: "¿Qué ídolo uruguayo es conocido como 'El Príncipe'?", options: ["Rubén Paz", "Enzo Francescoli", "Antonio Alzamendi", "Sebastián Abreu"], answer: 1 },
-                    { q: "¿Cómo se llama el río que originó el nombre del club?", options: ["Río Paraná", "Río Uruguay", "Río de la Plata", "Río Matanza"], answer: 2 }
+                    { q: "¿Cómo se llama el río que originó el nombre del club?", options: ["Río Paraná", "Río Uruguay", "Río de la Plata", "Río Matanza"], answer: 2 },
+                    { q: "¿En qué barrio de Buenos Aires se encuentra el Estadio Monumental?", options: ["Núñez", "Boedo", "La Boca", "Liniers"], answer: 0 },
+                    { q: "¿Con qué otro apodo, referido al color de su camiseta, se conoce a River?", options: ["La Banda Roja", "El Cilindro", "La Academia", "El Rojo"], answer: 0 },
+                    { q: "¿Qué apodo cariñoso recibía el ídolo Ariel Ortega?", options: ["El Burrito", "El Pity", "El Kun", "La Brujita"], answer: 0 },
+                    { q: "¿Qué histórico arquero de River es recordado por innovar saliendo a jugar con los pies?", options: ["Amadeo Carrizo", "Ubaldo Fillol", "Sergio Goycochea", "Germán Burgos"], answer: 0 },
+                    { q: "¿Qué delantero formado en las inferiores de River fue campeón del mundo con Argentina en 2022?", options: ["Julián Álvarez", "Lautaro Martínez", "Ángel Di María", "Paulo Dybala"], answer: 0 },
+                    { q: "¿Cómo se apodaba al histórico goleador Bernabé Ferreyra, ídolo de los años 30?", options: ["El Mortero de Rufino", "El Cañón de Avellaneda", "La Fiera de Junín", "El Trueno de Tigre"], answer: 0 },
+                    { q: "¿Qué selección utiliza habitualmente el Estadio Monumental como sede?", options: ["La Selección Argentina", "La Selección Uruguaya", "La Selección Chilena", "La Selección Brasileña"], answer: 0 },
+                    { q: "¿De qué país era el histórico delantero Alfredo Di Stéfano cuando brilló en River antes de emigrar a Europa?", options: ["Argentina", "España", "Uruguay", "Colombia"], answer: 0 },
+                    { q: "¿Qué delantero apodado 'Pipita' se formó en las inferiores de River antes de brillar en Europa?", options: ["Gonzalo Higuaín", "Sergio Agüero", "Carlos Tevez", "Ezequiel Lavezzi"], answer: 0 },
+                    { q: "¿Qué presidente histórico decidió la construcción del Estadio Monumental?", options: ["Antonio Vespucio Liberti", "Carlos Peucelle", "Leopoldo Bard", "Hugo Santilli"], answer: 0 },
+                    { q: "¿Quién fue el capitán que levantó la Copa Libertadores 1996 en el Monumental?", options: ["Enzo Francescoli", "Norberto Alonso", "Leonardo Astrada", "Matías Almeyda"], answer: 0 },
+                    { q: "¿A qué equipo mexicano le ganó River la final de la Copa Libertadores 2015?", options: ["Tigres UANL", "Cruz Azul", "América", "Chivas"], answer: 0 },
+                    { q: "¿Qué mediocampista, además de Julián Álvarez, se formó en River y fue campeón del mundo con Argentina en 2022?", options: ["Enzo Fernández", "Rodrigo De Paul", "Alexis Mac Allister", "Leandro Paredes"], answer: 0 },
+                    { q: "¿Quién anotó el primer gol de la final de la Copa Libertadores 2015 ante Tigres?", options: ["Lucas Alario", "Carlos Sánchez", "Ramiro Funes Mori", "Fernando Cavenaghi"], answer: 0 },
+                    { q: "¿A qué equipo colombiano venció River en la final de la Copa Sudamericana 2014, el primer título de la era Gallardo?", options: ["Atlético Nacional", "Millonarios", "Junior", "Santa Fe"], answer: 0 },
+                    { q: "¿A qué clásico rival eliminó River en semifinales de la Copa Sudamericana 2014?", options: ["Boca Juniors", "Independiente", "San Lorenzo", "Racing"], answer: 0 },
+                    { q: "¿Quién era el entrenador de River cuando ganó la Copa Libertadores 1996?", options: ["Ramón Díaz", "Alfio Basile", "Héctor Veira", "Ángel Labruna"], answer: 0 },
+                    { q: "¿A qué equipo colombiano venció River también en la final de la Copa Libertadores 1996?", options: ["América de Cali", "Atlético Nacional", "Millonarios", "Independiente Santa Fe"], answer: 0 }
                 ],
                 medio: [ 
                     { q: "¿Cuántas Copas Libertadores tiene River Plate?", options: ["3", "4", "5", "7"], answer: 1 }, 
@@ -1017,7 +1096,25 @@
                     { q: "¿Qué jugador anotó el tercer gol en Madrid en 2018?", options: ["Lucas Pratto", "Juan F. Quintero", "Gonzalo Martínez", "Ignacio Scocco"], answer: 2 }, 
                     { q: "¿Quién era el DT en la Copa Libertadores 1986?", options: ["Ramón Díaz", "Marcelo Gallardo", "Américo Gallego", "Hector Veira"], answer: 3 },
                     { q: "¿Qué mediocampista tiene el récord de más títulos como jugador en la historia del club?", options: ["Marcelo Gallardo", "Ariel Ortega", "Leonardo Ponzio", "Norberto Alonso"], answer: 2 },
-                    { q: "¿En qué histórico año River logró conseguir un tricampeonato nacional?", options: ["1986", "1997", "2014", "1994"], answer: 1 }
+                    { q: "¿En qué histórico año River logró conseguir un tricampeonato nacional?", options: ["1986", "1997", "2014", "1994"], answer: 1 },
+                    { q: "¿Cuántos títulos ganó Marcelo Gallardo como entrenador en su primer ciclo al mando de River?", options: ["14", "10", "18", "22"], answer: 0 },
+                    { q: "¿A qué entrenador superó Gallardo como el más ganador en la historia de River?", options: ["Ramón Díaz", "Ángel Labruna", "Renato Cesarini", "Américo Gallego"], answer: 0 },
+                    { q: "¿En qué año consiguió Gallardo su primer título como DT de River, la Copa Sudamericana?", options: ["2014", "2015", "2016", "2013"], answer: 0 },
+                    { q: "¿Cuántas veces ganó River la Recopa Sudamericana bajo la conducción de Gallardo?", options: ["3 veces", "1 vez", "2 veces", "4 veces"], answer: 0 },
+                    { q: "¿Contra qué equipo perdió River la final de la Copa Libertadores 2019, tras eliminar a Boca en semifinales?", options: ["Flamengo", "Palmeiras", "Gremio", "Santos"], answer: 0 },
+                    { q: "¿Con la transferencia de qué delantero se ganó River el apodo de 'Los Millonarios' en 1932?", options: ["Bernabé Ferreyra", "Carlos Peucelle", "Ángel Labruna", "José Manuel Moreno"], answer: 0 },
+                    { q: "¿Cuántos goles convirtió Bernabé Ferreyra en el campeonato de 1932, siendo el goleador del torneo?", options: ["43", "35", "50", "28"], answer: 0 },
+                    { q: "¿Qué histórico delantero fue el goleador del campeonato de 1947 en River, antes de consagrarse en el Real Madrid?", options: ["Alfredo Di Stéfano", "José Manuel Moreno", "Ángel Labruna", "Félix Loustau"], answer: 0 },
+                    { q: "¿Contra qué club se coronó campeón River en el Trofeo de Campeones 2021 con Gallardo como DT?", options: ["Colón", "Talleres", "Boca Juniors", "Racing"], answer: 0 },
+                    { q: "¿Cuántas Copas Argentina ganó River bajo la conducción de Marcelo Gallardo en su primer ciclo?", options: ["3", "1", "2", "4"], answer: 0 },
+                    { q: "¿Cuántos años llevaba River sin ganar la Copa Libertadores antes de conseguirla en 2015?", options: ["19 años", "10 años", "25 años", "15 años"], answer: 0 },
+                    { q: "¿Qué jugador colombiano marcó el gol de la ida para América de Cali en la final de 1996?", options: ["Antony de Ávila", "Faustino Asprilla", "Carlos Valderrama", "Iván Córdoba"], answer: 0 },
+                    { q: "¿Quién marcó los dos goles de River en la vuelta de la final de la Libertadores 1996 ante América de Cali?", options: ["Hernán Crespo", "Ariel Ortega", "Roberto Sensini", "Matías Almeyda"], answer: 0 },
+                    { q: "¿Qué resultado global obtuvo River en la final de la Copa Libertadores 2015 ante Tigres?", options: ["3 a 0", "2 a 1", "4 a 2", "1 a 0"], answer: 0 },
+                    { q: "¿Quién convirtió de penal el segundo gol de River en la final de la Libertadores 2015?", options: ["Carlos Sánchez", "Ramiro Funes Mori", "Leonardo Ponzio", "Lucas Alario"], answer: 0 },
+                    { q: "¿La final de la Copa Libertadores 1996 fue revancha de qué otra final anterior entre los mismos equipos?", options: ["La final de 1986", "La final de 1978", "La final de 1990", "La final de 1992"], answer: 0 },
+                    { q: "¿En qué estadio se jugó la ida de la final de la Copa Libertadores 1996?", options: ["Pascual Guerrero de Cali", "Monumental", "Nemesio Camacho El Campín", "Metropolitano de Barranquilla"], answer: 0 },
+                    { q: "¿Cuántas Copas Libertadores había ganado River antes de la obtenida en 2015, su tercera?", options: ["2", "1", "3", "0"], answer: 0 }
                 ],
                 dificil: [ 
                     { q: "¿Qué jugador tiene más presencias oficiales en la historia del club?", options: ["Amadeo Carrizo", "Reinaldo Merlo", "Norberto Alonso", "Ángel Labruna"], answer: 1 }, 
@@ -1026,7 +1123,25 @@
                     { q: "¿Cómo se llamaba la famosa delantera de la década del 40?", options: ["La Máquina", "La Maquinita", "Los Carasucias", "El Ballet"], answer: 0 }, 
                     { q: "¿Qué jugador de River hizo un famoso gol con una pelota naranja?", options: ["Enzo Francescoli", "Beto Alonso", "Ramón Díaz", "Oscar Ruggeri"], answer: 1 },
                     { q: "¿A qué club le ganó River la final de la Copa Interamericana en 1987?", options: ["América (México)", "Alajuelense (Costa Rica)", "Olimpia (Honduras)", "Pumas (México)"], answer: 1 },
-                    { q: "¿Quién fue designado por la FIFA como el mejor equipo argentino del Siglo XX?", options: ["Boca Juniors", "River Plate", "Independiente", "Racing"], answer: 1 }
+                    { q: "¿Quién fue designado por la FIFA como el mejor equipo argentino del Siglo XX?", options: ["Boca Juniors", "River Plate", "Independiente", "Racing"], answer: 1 },
+                    { q: "¿Cuántos goles anotó Ángel Labruna a lo largo de su carrera en River, siendo el goleador histórico del club?", options: ["317", "293", "250", "401"], answer: 0 },
+                    { q: "¿Cuántos goles convirtió Ángel Labruna en los clásicos frente a Boca, un récord que se mantiene?", options: ["16", "12", "20", "9"], answer: 0 },
+                    { q: "¿En qué fecha exacta debutó oficialmente Ángel Labruna en la Primera de River?", options: ["18 de junio de 1939", "3 de abril de 1938", "1 de enero de 1940", "25 de mayo de 1939"], answer: 0 },
+                    { q: "¿Cuánto pagó River por el pase de Bernabé Ferreyra en 1932, la cifra que originó el apodo 'Millonarios'?", options: ["35.000 pesos", "10.000 pesos", "50.000 pesos", "100.000 pesos"], answer: 0 },
+                    { q: "¿Cuánto había pagado River un año antes por el fichaje de Carlos Peucelle, que también contribuyó al apodo 'Millonarios'?", options: ["10.000 pesos", "5.000 pesos", "20.000 pesos", "35.000 pesos"], answer: 0 },
+                    { q: "¿A cuánto asciende la capacidad del Estadio Monumental tras la remodelación finalizada en 2023?", options: ["Cerca de 84.500 espectadores", "Cerca de 60.000 espectadores", "Cerca de 100.000 espectadores", "Cerca de 70.000 espectadores"], answer: 0 },
+                    { q: "¿En qué año se colocó la piedra fundacional del Estadio Monumental?", options: ["1935", "1930", "1938", "1940"], answer: 0 },
+                    { q: "¿De qué club provenía Bernabé Ferreyra cuando River pagó su histórico pase en 1932?", options: ["Tigre", "Vélez Sarsfield", "Platense", "Quilmes"], answer: 0 },
+                    { q: "¿Cuántos títulos coleccionó Marcelo Gallardo si se suman los ganados como jugador y como entrenador de River?", options: ["22", "14", "18", "20"], answer: 0 },
+                    { q: "¿Cuántos goles hizo Alfredo Di Stéfano como goleador del campeonato de River en 1947?", options: ["27", "30", "22", "35"], answer: 0 },
+                    { q: "¿En qué fecha exacta se jugó la vuelta de la final de la Copa Libertadores 1996 en el Monumental?", options: ["26 de junio de 1996", "19 de junio de 1996", "12 de junio de 1996", "3 de julio de 1996"], answer: 0 },
+                    { q: "¿Cuántos espectadores presenciaron la vuelta de la final de la Libertadores 1996 en el Monumental?", options: ["Más de 73.000", "Más de 40.000", "Más de 20.000", "Más de 100.000"], answer: 0 },
+                    { q: "¿En qué fecha exacta se disputó la vuelta de la final de la Copa Libertadores 2015 ante Tigres?", options: ["5 de agosto de 2015", "6 de agosto de 2015", "27 de mayo de 2015", "14 de julio de 2015"], answer: 0 },
+                    { q: "¿Quién anotó el tercer gol de River en la final de la Libertadores 2015, sellando el 3 a 0?", options: ["Ramiro Funes Mori", "Leonardo Pisculichi", "Carlos Sánchez", "Lucas Alario"], answer: 0 },
+                    { q: "¿A qué equipo brasileño eliminó River en cuartos de final rumbo a la Copa Libertadores 2015, con un global de 3-1?", options: ["Cruzeiro", "Guaraní", "Boca Juniors", "San Lorenzo"], answer: 0 },
+                    { q: "¿A qué equipo enfrentó River en semifinales de la Copa Libertadores 2015, con triunfo global de 3-1?", options: ["Guaraní", "Cruzeiro", "Boca Juniors", "Tigres"], answer: 0 },
+                    { q: "¿Qué participación numérica fue para River en la Copa Libertadores cuando disputó la edición de 1996?", options: ["La 17ª", "La 10ª", "La 25ª", "La 5ª"], answer: 0 },
+                    { q: "¿Cuántos goles convirtió Hernán Crespo en la vuelta de la final de la Libertadores 1996 para darle el título a River?", options: ["2", "1", "3", "0"], answer: 0 }
                 ],
                 socio: [ 
                     { q: "¿Quién fue el primer presidente de la historia del club?", options: ["Antonio Vespucio", "Leopoldo Bard", "Carlos Peucelle", "Hugo Santilli"], answer: 1 }, 
@@ -1035,7 +1150,25 @@
                     { q: "¿Cómo se llamaba el viejo estadio de River?", options: ["La Herradura", "Alvear y Tagle", "El Palacio", "Templo de Núñez"], answer: 1 }, 
                     { q: "¿Cuál es el nombre oficial y completo del estadio Monumental?", options: ["Estadio Antonio Vespucio Liberti", "Estadio Monumental de Núñez", "Estadio River Plate", "Estadio Amadeo Carrizo"], answer: 0 },
                     { q: "¿A qué histórico barrio porteño estuvo vinculado River antes de mudarse a Núñez/Belgrano?", options: ["Caballito", "La Boca", "Palermo", "San Telmo"], answer: 1 },
-                    { q: "¿En qué fecha exacta volvió River Plate a Primera División?", options: ["23 de junio de 2012", "26 de junio de 2011", "25 de mayo de 2012", "1 de enero de 2013"], answer: 0 }
+                    { q: "¿En qué fecha exacta volvió River Plate a Primera División?", options: ["23 de junio de 2012", "26 de junio de 2011", "25 de mayo de 2012", "1 de enero de 2013"], answer: 0 },
+                    { q: "¿A qué edad participó Ángel Labruna del Mundial de Suecia 1958 con la Selección Argentina?", options: ["39 años", "35 años", "41 años", "33 años"], answer: 0 },
+                    { q: "¿Qué lugar ocupó Ángel Labruna en el ranking IFFHS del mejor jugador sudamericano del siglo XX, publicado en 2006?", options: ["26° lugar", "10° lugar", "50° lugar", "5° lugar"], answer: 0 },
+                    { q: "¿Con cuántos goles fue Ángel Labruna goleador del Campeonato argentino en 1945?", options: ["25", "23", "30", "18"], answer: 0 },
+                    { q: "¿Con cuántos goles fue Ángel Labruna goleador del Campeonato argentino en 1943?", options: ["23", "25", "30", "19"], answer: 0 },
+                    { q: "¿Cuántos títulos ganó Ángel Labruna como jugador de River, sumando torneos nacionales e internacionales?", options: ["16", "9", "20", "12"], answer: 0 },
+                    { q: "¿Cuántas vueltas olímpicas dio Ángel Labruna como director técnico de River?", options: ["6", "4", "8", "3"], answer: 0 },
+                    { q: "¿En qué año Labruna, ya como DT, cortó una racha negativa del club logrando el bicampeonato?", options: ["1975", "1970", "1980", "1977"], answer: 0 },
+                    { q: "¿Cuántos días estuvo Marcelo Gallardo al frente de River en su primer ciclo, según se destacó al cumplirse ese hito?", options: ["3130 días", "2500 días", "4000 días", "1800 días"], answer: 0 },
+                    { q: "¿Cuánto invirtió River en total en fichajes durante 1932, la temporada que le dio el apodo 'Millonarios'?", options: ["105.000 pesos", "35.000 pesos", "200.000 pesos", "60.000 pesos"], answer: 0 },
+                    { q: "¿A qué arquero compró River en 1932 por 30.000 pesos, como parte de la inversión que le dio el apodo 'Millonarios'?", options: ["Ángel Bossio", "Amadeo Carrizo", "Hugo Gatti", "Ubaldo Fillol"], answer: 0 },
+                    { q: "¿Quién fue el arquero titular de River en la final de la Copa Libertadores 2015 ante Tigres?", options: ["Marcelo Barovero", "Germán Lux", "Juan Pablo Carrizo", "Augusto Batalla"], answer: 0 },
+                    { q: "¿Quién asistió a Lucas Alario en el primer gol de la final de la Libertadores 2015?", options: ["Leonel Vangioni", "Leonardo Pisculichi", "Carlos Sánchez", "Camilo Mayada"], answer: 0 },
+                    { q: "¿Quién asistió a Ramiro Funes Mori en el tercer gol de la final de la Libertadores 2015?", options: ["Leonardo Pisculichi", "Leonel Vangioni", "Matías Kranevitter", "Luis González"], answer: 0 },
+                    { q: "¿Qué campeonato local le permitió a River clasificar a la Copa Libertadores 2015?", options: ["El Torneo Final 2014", "El Torneo Apertura 2013", "El Torneo Inicial 2015", "El Torneo Clausura 2014"], answer: 0 },
+                    { q: "¿Qué jugador clave se lesionó y no pudo jugar la vuelta de la final 2015, siendo reemplazado por Fernando Cavenaghi?", options: ["Rodrigo Mora", "Carlos Sánchez", "Ramiro Funes Mori", "Leonardo Ponzio"], answer: 0 },
+                    { q: "¿Dónde entrenó Tigres UANL antes de la vuelta de la final 2015, en pleno territorio del clásico rival?", options: ["En las instalaciones de Boca Juniors", "En el predio de la AFA", "En Ferro Carril Oeste", "En el Cenard"], answer: 0 },
+                    { q: "¿Cuántas veces había disputado River una final de Copa Libertadores hasta la edición de 1996 inclusive?", options: ["4 veces", "2 veces", "3 veces", "5 veces"], answer: 0 },
+                    { q: "¿En qué fecha exacta se jugó la ida de la final de la Copa Libertadores 1996 en Cali?", options: ["19 de junio de 1996", "12 de junio de 1996", "26 de junio de 1996", "3 de julio de 1996"], answer: 0 }
                 ]
             },
             "Boca Juniors": {
@@ -1046,7 +1179,25 @@
                     { q: "¿Cuál es su clásico rival?", options: ["Independiente", "San Lorenzo", "Racing", "River Plate"], answer: 3 }, 
                     { q: "¿En qué barrio está ubicado su estadio?", options: ["La Boca", "Avellaneda", "Boedo", "Núñez"], answer: 0 },
                     { q: "¿Qué ídolo histórico es popularmente conocido como 'El Último Diez'?", options: ["Diego Maradona", "Carlos Tevez", "Juan Román Riquelme", "Fernando Gago"], answer: 2 },
-                    { q: "¿Quién es conocido popularmente como 'El Titán' en Boca?", options: ["Guillermo Barros Schelotto", "Rolando Schiavi", "Martín Palermo", "Sebastián Battaglia"], answer: 2 }
+                    { q: "¿Quién es conocido popularmente como 'El Titán' en Boca?", options: ["Guillermo Barros Schelotto", "Rolando Schiavi", "Martín Palermo", "Sebastián Battaglia"], answer: 2 },
+                    { q: "¿En qué año Boca realizó su histórica gira por Europa, siendo el primer equipo argentino en jugar allí?", options: ["1920", "1925", "1930", "1935"], answer: 1 },
+                    { q: "¿A qué club español venció Boca 1-0 en su gira europea de 1925?", options: ["Real Madrid", "Atlético de Madrid", "Athletic Bilbao", "Espanyol"], answer: 0 },
+                    { q: "¿Quién fue la gran figura y goleador de la gira europea de 1925, cedido por El Porvenir?", options: ["Manuel Seoane", "Domingo Tarasconi", "Cesáreo Onzari", "Américo Tesoriere"], answer: 0 },
+                    { q: "¿Cómo se apoda al histórico ídolo Carlos Tevez?", options: ["El Apache", "El Titán", "El Loco", "El Pity"], answer: 0 },
+                    { q: "¿De qué club fichó Boca a Diego Maradona en 1981?", options: ["Argentinos Juniors", "River Plate", "Estudiantes", "Newell's Old Boys"], answer: 0 },
+                    { q: "¿Contra qué equipo brasileño ganó Boca la final de la Copa Libertadores 1977, su primer título en esa copa?", options: ["Cruzeiro", "Santos", "Grêmio", "Palmeiras"], answer: 0 },
+                    { q: "¿Quién atajó el penal decisivo que le dio a Boca su primera Copa Libertadores en 1977?", options: ["Hugo Gatti", "Roberto Abbondanzieri", "Carlos Navarro Montoya", "Silvio Marzolini"], answer: 0 },
+                    { q: "¿Contra qué equipo alemán ganó Boca su primera Copa Intercontinental?", options: ["Borussia Mönchengladbach", "Bayern Munich", "Hamburgo", "Werder Bremen"], answer: 0 },
+                    { q: "¿Contra qué equipo mexicano ganó Boca la final de la Copa Libertadores 2001?", options: ["Cruz Azul", "América", "Pumas UNAM", "Chivas"], answer: 0 },
+                    { q: "¿Contra qué equipo brasileño ganó Boca la final de la Copa Libertadores 2003?", options: ["Santos", "Cruzeiro", "Grêmio", "Palmeiras"], answer: 0 },
+                    { q: "¿Contra qué equipo brasileño ganó Boca su última Copa Libertadores, en 2007?", options: ["Grêmio", "Santos", "Internacional", "Fluminense"], answer: 0 },
+                    { q: "¿Quién fue la gran figura de Boca en la final de la Copa Libertadores 2007, anotando 3 goles en la serie?", options: ["Juan Román Riquelme", "Rodrigo Palacio", "Fernando Gago", "Pablo Ledesma"], answer: 0 },
+                    { q: "¿A qué equipo boliviano venció Boca en la final de su primera Copa Sudamericana, en 2004?", options: ["Bolívar", "The Strongest", "Oriente Petrolero", "Blooming"], answer: 0 },
+                    { q: "¿A qué equipo mexicano venció Boca en la final de la Copa Sudamericana 2005, defendiendo el título?", options: ["Pumas UNAM", "Cruz Azul", "América", "Toluca"], answer: 0 },
+                    { q: "¿En qué plaza porteña se fundó oficialmente Boca Juniors en 1905?", options: ["Plaza Solís", "Plaza de Mayo", "Plaza Constitución", "Plaza San Martín"], answer: 0 },
+                    { q: "¿Quién fue, junto a Baglietto, Scarpati y los hermanos Farenga, uno de los cinco fundadores de Boca?", options: ["Santiago Sana", "Domingo Tarasconi", "Roberto Cherro", "Ricardo Alarcón"], answer: 0 },
+                    { q: "¿Contra qué equipo jugó y ganó Boca su primer partido oficial, en abril de 1905?", options: ["Mariano Moreno", "Independiente", "River Plate", "San Lorenzo"], answer: 0 },
+                    { q: "¿Contra qué club uruguayo perdió Boca su primer partido internacional, en 1907?", options: ["Universal", "Peñarol", "Nacional", "Danubio"], answer: 0 }
                 ],
                 medio: [ 
                     { q: "¿Cuántas Copas Libertadores tiene Boca?", options: ["4", "5", "6", "7"], answer: 2 }, 
@@ -1055,7 +1206,25 @@
                     { q: "¿En qué año se fundó el club?", options: ["1901", "1905", "1910", "1915"], answer: 1 }, 
                     { q: "¿Contra qué equipo ganó su primera Copa Libertadores (1977)?", options: ["Deportivo Cali", "América de Cali", "Palmeiras", "Cruzeiro"], answer: 3 },
                     { q: "¿Qué jugador de Boca es el más ganador de la historia del club?", options: ["Juan Román Riquelme", "Sebastián Battaglia", "Guillermo Barros Schelotto", "Hugo Ibarra"], answer: 1 },
-                    { q: "¿En qué año se inauguró La Bombonera?", options: ["1930", "1940", "1950", "1960"], answer: 1 }
+                    { q: "¿En qué año se inauguró La Bombonera?", options: ["1930", "1940", "1950", "1960"], answer: 1 },
+                    { q: "¿Cuántos partidos jugó Boca en total en su gira europea de 1925?", options: ["19", "15", "22", "25"], answer: 0 },
+                    { q: "¿Qué distinción le otorgó la AFA a Boca por su desempeño en la gira europea de 1925?", options: ["Campeón de Honor 1925", "Campeón de América", "Embajador del Fútbol", "Copa de Oro"], answer: 0 },
+                    { q: "¿En qué estadio se definió por penales la final de la Copa Libertadores 1977 ante Cruzeiro?", options: ["Estadio Centenario de Montevideo", "La Bombonera", "El Monumental", "Estadio Nacional de Chile"], answer: 0 },
+                    { q: "¿En qué ciudad alemana se jugó la vuelta de la Copa Intercontinental 1977 (disputada en 1978) ante Borussia Mönchengladbach?", options: ["Karlsruhe", "Múnich", "Berlín", "Hamburgo"], answer: 0 },
+                    { q: "¿Por cuánto ganó Boca la vuelta de esa Intercontinental en Alemania?", options: ["3 a 0", "2 a 1", "1 a 0", "4 a 1"], answer: 0 },
+                    { q: "¿A qué equipo eliminó Boca en cuartos de final rumbo a la Copa Libertadores 2000, con un contundente 3-0?", options: ["River Plate", "Independiente", "Vélez Sarsfield", "Racing"], answer: 0 },
+                    { q: "¿Contra qué equipo brasileño ganó Boca la final de la Copa Libertadores 2000 por penales?", options: ["Palmeiras", "Santos", "Cruzeiro", "Vasco da Gama"], answer: 0 },
+                    { q: "¿En qué estadio se jugó la ida de la final de la Copa Libertadores 2001 ante Cruz Azul?", options: ["Estadio Azteca", "La Bombonera", "Estadio Olímpico Universitario", "Estadio Jalisco"], answer: 0 },
+                    { q: "¿Quién fue la figura del partido de ida de esa final de 2001?", options: ["Juan Román Riquelme", "Martín Palermo", "Marcelo Delgado", "Guillermo Barros Schelotto"], answer: 0 },
+                    { q: "¿Con qué resultado global ganó Boca la final de la Libertadores 2003 ante Santos?", options: ["5 a 1", "3 a 2", "2 a 0", "4 a 3"], answer: 0 },
+                    { q: "¿Qué joven jugador fue la gran figura de Boca en la Copa Libertadores 2003, con apenas 19 años?", options: ["Carlos Tevez", "Fernando Gago", "Nicolás Burdisso", "Rolando Schiavi"], answer: 0 },
+                    { q: "¿A qué equipo eliminó Boca por penales en los octavos de final de la Copa Sudamericana 2004?", options: ["San Lorenzo", "Racing", "Independiente", "Vélez Sarsfield"], answer: 0 },
+                    { q: "¿A qué histórico récord llegó Martín Palermo en el mismo partido en que Boca se consagró campeón de la Sudamericana 2004?", options: ["Sus 100 goles con la camiseta de Boca", "Su gol número 200", "Su último partido oficial", "Su debut como capitán"], answer: 0 },
+                    { q: "¿Por qué penales ganó Boca la final de la Copa Sudamericana 2005 ante Pumas UNAM?", options: ["4 a 3", "5 a 4", "3 a 2", "4 a 2"], answer: 0 },
+                    { q: "¿En qué década regresó Diego Maradona a jugar en Boca, tras su paso por Barcelona y Napoli?", options: ["En los años 90", "En los años 80", "En los años 2000", "Nunca volvió"], answer: 0 },
+                    { q: "¿Cuántos partidos disputó Juan Román Riquelme con la camiseta de Boca?", options: ["388", "350", "410", "300"], answer: 0 },
+                    { q: "¿Cuántos goles convirtió Riquelme en Copa Libertadores con Boca, un récord del club en esa competencia?", options: ["25", "18", "30", "15"], answer: 0 },
+                    { q: "¿Qué jugador de Boca tiene el récord de más presencias en competiciones internacionales del club?", options: ["Roberto Abbondanzieri", "Hugo Gatti", "Silvio Marzolini", "Martín Palermo"], answer: 0 }
                 ],
                 dificil: [ 
                     { q: "¿Cuántas Copas Intercontinentales ganó Boca?", options: ["1", "2", "3", "4"], answer: 2 }, 
@@ -1064,7 +1233,25 @@
                     { q: "¿Cuántos goles oficiales hizo Martín Palermo en Boca?", options: ["210", "225", "236", "248"], answer: 2 }, 
                     { q: "¿A qué equipo le ganó la Intercontinental 2003?", options: ["Bayern Munich", "Real Madrid", "Milan", "Ajax"], answer: 2 },
                     { q: "¿Quién era el goleador histórico de Boca antes de ser superado por Palermo?", options: ["Francisco Varallo", "Roberto Cherro", "Domingo Tarasconi", "Mario Boyé"], answer: 1 },
-                    { q: "¿En qué año ganó Boca su primera Copa Sudamericana?", options: ["2002", "2004", "2005", "2014"], answer: 1 }
+                    { q: "¿En qué año ganó Boca su primera Copa Sudamericana?", options: ["2002", "2004", "2005", "2014"], answer: 1 },
+                    { q: "¿Cuántos goles convirtió Boca a favor durante su gira europea de 1925?", options: ["40", "35", "45", "28"], answer: 0 },
+                    { q: "¿Cuántos goles recibió Boca en contra durante toda la gira europea de 1925?", options: ["16", "10", "22", "8"], answer: 0 },
+                    { q: "¿Con qué efectividad terminó Boca su gira europea de 1925?", options: ["Cerca del 79%", "Cerca del 60%", "Cerca del 90%", "Cerca del 50%"], answer: 0 },
+                    { q: "¿En qué ciudad española debutó Boca en su gira de 1925, goleando al Celta de Vigo?", options: ["Vigo", "Madrid", "Barcelona", "Bilbao"], answer: 0 },
+                    { q: "¿Con qué apodo se conoció al hincha Victoriano Caffarena, que acompañó a la delegación de Boca en la gira de 1925?", options: ["El jugador número 12", "El hincha de oro", "El Xeneize eterno", "El decimotercer hombre"], answer: 0 },
+                    { q: "¿Por qué resultado global ganó Boca la Copa Intercontinental 1977 (jugada en 1978) ante Borussia Mönchengladbach?", options: ["5 a 2", "3 a 0", "4 a 1", "2 a 1"], answer: 0 },
+                    { q: "¿Cuál fue el resultado de la ida de esa final Intercontinental, disputada en la Bombonera?", options: ["2 a 2", "1 a 1", "3 a 1", "0 a 0"], answer: 0 },
+                    { q: "¿Cuántas Copas Libertadores consecutivas ganó Boca en 1977 y 1978, su primer bicampeonato en esa copa?", options: ["2", "3", "1", "4"], answer: 0 },
+                    { q: "¿Cuántas finales de Copa Libertadores disputó Boca en toda su historia, un récord de la competición?", options: ["12", "9", "15", "7"], answer: 0 },
+                    { q: "¿Cuál es la mayor goleada de Boca de local en competiciones sudamericanas?", options: ["7-0 a Bolívar (2007)", "6-0 a Cerro Porteño", "5-0 a Nacional", "8-1 a The Strongest"], answer: 0 },
+                    { q: "¿Cuál es la mayor goleada de Boca como visitante en competiciones sudamericanas?", options: ["5-1 a Zamora (2015)", "4-0 a Guaraní", "6-2 a Sporting Cristal", "3-0 a Emelec"], answer: 0 },
+                    { q: "¿A qué equipo eliminó Boca en semifinales de la Copa Sudamericana 2004?", options: ["Internacional (de Porto Alegre)", "Grêmio", "Flamengo", "São Paulo"], answer: 0 },
+                    { q: "¿A qué equipo eliminó Boca en cuartos de final de la Copa Sudamericana 2004?", options: ["Cerro Porteño", "Guaraní", "Olimpia", "Nacional"], answer: 0 },
+                    { q: "¿Cuántos partidos internacionales disputó Roberto Abbondanzieri con la camiseta de Boca, un récord del club?", options: ["100", "85", "120", "70"], answer: 0 },
+                    { q: "¿Cuántos goles convirtió Martín Palermo en competiciones internacionales con Boca, también un récord?", options: ["43", "36", "50", "29"], answer: 0 },
+                    { q: "¿Qué presidente de Boca impulsó el frustrado proyecto de la Ciudad Deportiva, pensado para el Mundial 1978?", options: ["Alberto José Armando", "Camilo Cichero", "Mauricio Macri", "Antonio Vespucio Liberti"], answer: 0 },
+                    { q: "¿Para cuántos espectadores estaba proyectado el estadio de la Ciudad Deportiva, nunca terminado?", options: ["100.000", "70.000", "120.000", "85.000"], answer: 0 },
+                    { q: "¿A qué edad fue Carlos Tevez la gran figura de la Copa Libertadores 2003 con Boca?", options: ["19 años", "17 años", "21 años", "23 años"], answer: 0 }
                 ],
                 socio: [ 
                     { q: "¿Cuál es la fecha exacta de fundación de Boca Juniors?", options: ["1 de enero de 1905", "3 de abril de 1905", "25 de mayo de 1905", "12 de octubre de 1905"], answer: 1 }, 
@@ -1073,7 +1260,25 @@
                     { q: "¿De qué país era el barco que inspiró los colores Azul y Oro?", options: ["España", "Suecia", "Inglaterra", "Italia"], answer: 1 }, 
                     { q: "¿Quién fue el primer presidente de la historia de Boca?", options: ["Esteban Baglietto", "Juan B. Farenga", "Santiago Sana", "Alfredo Scarpati"], answer: 0 },
                     { q: "¿Contra qué equipo jugó Boca el día que se inauguró La Bombonera?", options: ["River Plate", "San Lorenzo", "Independiente", "Racing"], answer: 1 },
-                    { q: "¿De qué color era la primera camiseta de Boca antes de usar azul y amarillo?", options: ["Roja", "Blanca y negra a rayas", "Celeste", "Rosa"], answer: 1 }
+                    { q: "¿De qué color era la primera camiseta de Boca antes de usar azul y amarillo?", options: ["Roja", "Blanca y negra a rayas", "Celeste", "Rosa"], answer: 1 },
+                    { q: "¿En qué fecha exacta zarpó la delegación de Boca desde Buenos Aires rumbo a su gira europea de 1925?", options: ["4 de febrero de 1925", "20 de enero de 1925", "1 de marzo de 1925", "15 de abril de 1925"], answer: 0 },
+                    { q: "¿En qué fecha regresó la delegación de Boca a Buenos Aires tras su gira europea de 1925?", options: ["12 de julio de 1925", "20 de junio de 1925", "1 de agosto de 1925", "15 de mayo de 1925"], answer: 0 },
+                    { q: "¿Cuántos jugadores utilizó en total Boca durante toda su gira europea de 1925?", options: ["17", "12", "22", "15"], answer: 0 },
+                    { q: "¿Quién compuso el primer himno oficial de Boca Juniors, en 1926?", options: ["Victoriano 'Toto' Caffarena", "Adelio Cariboni", "Vicente Decap", "Américo Tesoriere"], answer: 0 },
+                    { q: "¿Cuántos jugadores reforzaron el plantel de Boca para la gira europea de 1925, cedidos por otros clubes?", options: ["5", "3", "7", "2"], answer: 0 },
+                    { q: "¿En qué fecha exacta se jugó el desempate que le dio a Boca su primera Copa Libertadores en 1977?", options: ["14 de septiembre de 1977", "11 de septiembre de 1977", "6 de septiembre de 1977", "1 de octubre de 1977"], answer: 0 },
+                    { q: "¿Cómo quedaron los dos primeros partidos de esa final 1977 ante Cruzeiro, antes del desempate?", options: ["Un triunfo para cada uno (1-0 y 0-1)", "Boca ganó los dos", "Cruzeiro ganó los dos", "Empataron los dos"], answer: 0 },
+                    { q: "¿En qué estadio se jugó el partido de ida de la final de la Libertadores 1977 ante Cruzeiro?", options: ["La Bombonera", "El Mineirão", "El Centenario", "El Monumental"], answer: 0 },
+                    { q: "¿En qué estadio se jugó la vuelta de esa final 1977 en Brasil?", options: ["Mineirão", "Maracaná", "Morumbí", "Pacaembú"], answer: 0 },
+                    { q: "¿Cuántos espectadores presenciaron la vuelta de la final 1977 en el Mineirão?", options: ["80.000", "60.000", "45.000", "100.000"], answer: 0 },
+                    { q: "¿En qué estadio se jugó la ida de la Copa Intercontinental 1977 (disputada en 1978) ante el Borussia?", options: ["La Bombonera", "El Monumental", "Wildparkstadion", "Estadio Centenario"], answer: 0 },
+                    { q: "¿Cuántos espectadores presenciaron la ida de esa final Intercontinental en la Bombonera?", options: ["60.000", "45.000", "30.000", "70.000"], answer: 0 },
+                    { q: "¿Quién fue el árbitro de la vuelta de esa Copa Intercontinental, jugada en Alemania?", options: ["Roque Cerullo", "Nikola Dudin", "César Orozco", "Vicente Llobregat"], answer: 0 },
+                    { q: "¿Cuántas veces había sido finalista de la Copa Libertadores antes de ganarla por primera vez en 1977?", options: ["1 vez (1963)", "Ninguna", "2 veces", "3 veces"], answer: 0 },
+                    { q: "¿Quién fue el árbitro del partido de desempate de la final 1977 en Montevideo?", options: ["Vicente Llobregat", "Roque Cerullo", "César Orozco", "Nikola Dudin"], answer: 0 },
+                    { q: "¿Quién fue la figura del partido de vuelta de la final de la Copa Sudamericana 2005 ante Pumas UNAM?", options: ["Roberto Abbondanzieri", "Rodrigo Palacio", "Nicolás Burdisso", "Clemente Rodríguez"], answer: 0 },
+                    { q: "¿Quién fue la figura del partido de ida de esa final de la Sudamericana 2005, jugado en México?", options: ["Rodrigo Palacio", "Roberto Abbondanzieri", "Guillermo Barros Schelotto", "Nicolás Gaitán"], answer: 0 },
+                    { q: "¿Cuántos espectadores presenciaron el desempate en Montevideo que le dio a Boca su primer título de Libertadores?", options: ["60.000", "45.000", "30.000", "80.000"], answer: 0 }
                 ]
             },
             "Independiente": {
@@ -1084,7 +1289,25 @@
                     { q: "¿Cuál es su clásico rival de barrio?", options: ["San Lorenzo", "Boca Juniors", "River Plate", "Racing"], answer: 3 }, 
                     { q: "¿Qué jugador histórico utilizaba la camiseta número 10 en los 70s y 80s?", options: ["Diego Maradona", "Ricardo Bochini", "Sergio Agüero", "Daniel Bertoni"], answer: 1 },
                     { q: "¿En qué ciudad y partido se encuentra el club?", options: ["La Plata", "Avellaneda", "Quilmes", "Lanús"], answer: 1 },
-                    { q: "¿Qué famoso apodo relacionado a una figura mítica tiene el club?", options: ["El León", "El Diablo", "El Dragón", "El Mago"], answer: 1 }
+                    { q: "¿Qué famoso apodo relacionado a una figura mítica tiene el club?", options: ["El León", "El Diablo", "El Dragón", "El Mago"], answer: 1 },
+                    { q: "¿Quién fue el entrenador de Independiente campeón de la primera Copa Libertadores en 1964?", options: ["Manuel Giúdice", "José Pastoriza", "Humberto Maschio", "Roberto Ferreiro"], answer: 0 },
+                    { q: "¿Quién fue el capitán del equipo campeón de la Libertadores 1964?", options: ["Jorge Maldonado", "Raúl Bernao", "Luis Suárez", "Osvaldo Mura"], answer: 0 },
+                    { q: "¿Quién marcó el único gol de la final de 1964 ante Nacional?", options: ["Mario Rodríguez", "Raúl Savoy", "Raúl Bernao", "Osvaldo Mura"], answer: 0 },
+                    { q: "¿A qué equipo uruguayo venció Independiente en la final de la Libertadores 1965, revalidando el título?", options: ["Peñarol", "Nacional", "Danubio", "Defensor"], answer: 0 },
+                    { q: "¿En qué ciudad se definió por un partido de desempate la final de la Libertadores 1965?", options: ["Santiago de Chile", "Lima", "Asunción", "Bogotá"], answer: 0 },
+                    { q: "¿A qué grupo de jóvenes empleados pertenecían los fundadores de Independiente en 1904?", options: ["Empleados de la tienda 'A la Ciudad de Londres'", "Estudiantes de una escuela técnica", "Trabajadores del puerto", "Empleados del ferrocarril"], answer: 0 },
+                    { q: "¿En qué barrio porteño estaba ubicada la tienda donde trabajaban los fundadores de Independiente?", options: ["Montserrat", "Palermo", "Belgrano", "Caballito"], answer: 0 },
+                    { q: "¿A qué club le iban a proponer unirse los fundadores de Independiente antes de decidir formar su propio club?", options: ["Atlanta", "Chacarita", "Argentinos Juniors", "Platense"], answer: 0 },
+                    { q: "¿Cómo se llamaba el club de fútbol de la tienda del que fueron excluidos los jóvenes fundadores?", options: ["Maipo-Banfield", "Ciudad de Londres FC", "Victoria FC", "Montserrat Athletic"], answer: 0 },
+                    { q: "¿Quién fue el secretario de la primera Comisión Directiva Provisoria de Independiente en 1904?", options: ["Marcelo Degiorgi", "Luis Bassou", "Nicolás Cabana", "Fernando Aizpuru"], answer: 0 },
+                    { q: "¿Entre qué edades tenían aproximadamente los ocho fundadores originales de Independiente?", options: ["Entre 14 y 17 años", "Entre 18 y 22 años", "Entre 20 y 25 años", "Entre 12 y 14 años"], answer: 0 },
+                    { q: "¿Cuánto costaba la cuota social cuando se fundó Independiente?", options: ["25 centavos", "10 centavos", "50 centavos", "1 peso"], answer: 0 },
+                    { q: "¿Contra qué club disputó Independiente uno de sus primeros partidos amistosos?", options: ["Atlanta", "River Plate", "San Lorenzo", "Vélez Sarsfield"], answer: 0 },
+                    { q: "¿Con qué otro nombre coloquial se conoce a los hinchas e ídolos de Independiente?", options: ["Diablos Rojos", "Millonarios", "Xeneizes", "Cuervos"], answer: 0 },
+                    { q: "¿Contra qué equipo brasileño venció Independiente en semifinales camino a su primera Copa Libertadores de 1964?", options: ["Santos", "Palmeiras", "Cruzeiro", "Flamengo"], answer: 0 },
+                    { q: "¿Por qué contundente resultado goleó Independiente a Millonarios de Colombia en la fase de grupos de la Libertadores 1964?", options: ["5 a 1", "4 a 0", "3 a 1", "6 a 2"], answer: 0 },
+                    { q: "¿Contra qué equipo peruano compartió Independiente su zona en la fase de grupos de la Libertadores 1964?", options: ["Alianza Lima", "Universitario", "Sporting Cristal", "Sport Boys"], answer: 0 },
+                    { q: "¿Cómo se apoda popularmente a Ricardo Bochini, ídolo histórico de Independiente?", options: ["El Bocha", "El Diez", "El Maestro", "El Genio"], answer: 0 }
                 ],
                 medio: [ 
                     { q: "¿Cuántas Copas Libertadores tiene Independiente?", options: ["5", "6", "7", "8"], answer: 2 }, 
@@ -1093,7 +1316,25 @@
                     { q: "¿Entre qué años logró su récord de 4 Copas Libertadores consecutivas?", options: ["1964-1967", "1972-1975", "1982-1985", "1994-1997"], answer: 1 }, 
                     { q: "¿En qué año ganó su última Copa Sudamericana en el Maracaná?", options: ["2010", "2015", "2017", "2020"], answer: 2 },
                     { q: "¿Quién era el capitán del equipo campeón de la Sudamericana 2017?", options: ["Alan Velasco", "Nicolás Tagliafico", "Ezequiel Barco", "Martín Campaña"], answer: 1 },
-                    { q: "¿Contra qué equipo ganó Independiente su primera Copa Libertadores en 1964?", options: ["Peñarol", "Santos", "Nacional", "Boca Juniors"], answer: 2 }
+                    { q: "¿Contra qué equipo ganó Independiente su primera Copa Libertadores en 1964?", options: ["Peñarol", "Santos", "Nacional", "Boca Juniors"], answer: 2 },
+                    { q: "¿En qué estadio se jugó la ida de la final de la Libertadores 1964 ante Nacional?", options: ["Estadio Centenario de Montevideo", "La Doble Visera", "El Monumental", "Parque Central"], answer: 0 },
+                    { q: "¿Cuál fue el resultado de la ida de esa final, en Montevideo?", options: ["0 a 0", "1 a 1", "2 a 0", "1 a 0"], answer: 0 },
+                    { q: "¿Cuál fue el resultado de la vuelta de la final de 1964, en Avellaneda?", options: ["1 a 0", "2 a 1", "1 a 1", "2 a 0"], answer: 0 },
+                    { q: "¿Por qué resultado venció Independiente a Santos en la ida de la semifinal de la Libertadores 1964, jugada en San Pablo?", options: ["3 a 2", "2 a 1", "1 a 0", "4 a 2"], answer: 0 },
+                    { q: "¿Con qué resultado ganó Independiente el desempate de la final de la Libertadores 1965 ante Peñarol, en Santiago?", options: ["4 a 1", "3 a 0", "2 a 1", "5 a 2"], answer: 0 },
+                    { q: "¿Cuántos títulos de Libertadores tenía Peñarol antes de perder la final de 1965 ante Independiente?", options: ["2 (1960 y 1961)", "1 (1960)", "3 (1960, 1961 y 1962)", "Ninguno"], answer: 0 },
+                    { q: "¿En qué lugar se reunieron los fundadores de Independiente el 4 de agosto de 1904, frente a la tienda donde trabajaban?", options: ["El almacén de los hermanos Fuertes", "Un café de la Plaza de Mayo", "La sede de Atlanta", "Una confitería de Montserrat"], answer: 0 },
+                    { q: "¿En qué calle porteña se ubicaba el almacén donde se fundó Independiente?", options: ["Victoria (hoy Hipólito Yrigoyen)", "Corrientes", "Rivadavia", "Belgrano"], answer: 0 },
+                    { q: "¿Quién fue el tesorero de la primera Comisión Directiva Provisoria de 1904?", options: ["Luis Bassou", "Marcelo Degiorgi", "Nicolás Cabana", "J.F. Ipart"], answer: 0 },
+                    { q: "¿Cuántos integrantes tuvo la Comisión Directiva Provisoria fundacional de 1904?", options: ["8", "5", "10", "6"], answer: 0 },
+                    { q: "¿Cuántos socios llegaron a sumar los fundadores originales de Independiente en su primer núcleo?", options: ["25", "17", "40", "12"], answer: 0 },
+                    { q: "¿De qué club provenían los hermanos Langone, que se unieron a Independiente con su camiseta blanca?", options: ["Palte United FC", "Estudiantil Porteño", "Barracas Central", "Defensores de Belgrano"], answer: 0 },
+                    { q: "¿En qué zona de Buenos Aires jugaba el Palte United FC, club de origen de los hermanos Langone?", options: ["Barracas al Norte", "La Boca", "San Telmo", "Constitución"], answer: 0 },
+                    { q: "¿Cuántos días pasaron entre la reunión fundacional del 4 de agosto de 1904 y la fecha oficial de fundación?", options: ["150 días", "100 días", "200 días", "365 días"], answer: 0 },
+                    { q: "¿Quién asumió como tesorero definitivo el 1° de enero de 1905, día de la fundación oficial?", options: ["Carlos Degiorgi", "Luis Bassou", "Rosendo Degiorgi", "Marcelo Degiorgi"], answer: 0 },
+                    { q: "¿Contra qué otro equipo, además de Atlanta, jugó Independiente uno de sus primeros amistosos?", options: ["Maipo-Banfield", "Estudiantil Porteño", "Barracas Central", "Colegiales"], answer: 0 },
+                    { q: "¿Quién fue elegido presidente definitivo de Independiente el 1° de enero de 1905?", options: ["Arístides Langone", "Rosendo Degiorgi", "Carlos Degiorgi", "Pedro Iso"], answer: 0 },
+                    { q: "¿En qué año Independiente disputó por primera vez la Copa Libertadores, cayendo en la primera rueda?", options: ["1961", "1960", "1963", "1958"], answer: 0 }
                 ],
                 dificil: [ 
                     { q: "¿Cuántas Copas Intercontinentales ganó Independiente?", options: ["1", "2", "3", "4"], answer: 1 }, 
@@ -1102,7 +1343,25 @@
                     { q: "¿A qué equipo inglés derrotó en la final Intercontinental de 1984?", options: ["Aston Villa", "Nottingham Forest", "Manchester United", "Liverpool"], answer: 3 }, 
                     { q: "¿Cuántos goles oficiales marcó Arsenio Erico en el fútbol argentino (según AFA)?", options: ["250", "275", "295", "320"], answer: 2 },
                     { q: "¿Quién fue el arquero ataja-penales de la Copa Libertadores 1972?", options: ["Miguel Santoro", "Faryd Mondragón", "Carlos Goyén", "Luis Islas"], answer: 0 },
-                    { q: "¿A qué equipo le ganó la final de la Copa Interamericana en 1976?", options: ["América", "Atlético Español", "Cruz Azul", "Olimpia"], answer: 1 }
+                    { q: "¿A qué equipo le ganó la final de la Copa Interamericana en 1976?", options: ["América", "Atlético Español", "Cruz Azul", "Olimpia"], answer: 1 },
+                    { q: "¿Quién fue el árbitro de la vuelta de la final de la Libertadores 1964 en Avellaneda?", options: ["Dimas Larrosa", "Leo Horn", "Arturo Yamasaki", "Roque Cerullo"], answer: 0 },
+                    { q: "¿Cuántos espectadores presenciaron la vuelta de la final de 1964 en Avellaneda?", options: ["80.000", "60.000", "45.000", "100.000"], answer: 0 },
+                    { q: "¿Quién fue el árbitro del desempate de la final de la Libertadores 1965 en Santiago de Chile?", options: ["Arturo Yamasaki", "Leo Horn", "Dimas Larrosa", "Vicente Llobregat"], answer: 0 },
+                    { q: "¿En qué fecha exacta se jugó la ida de la final de la Libertadores 1964, en Montevideo?", options: ["6 de agosto de 1964", "12 de agosto de 1964", "20 de julio de 1964", "1 de septiembre de 1964"], answer: 0 },
+                    { q: "¿En qué fecha exacta se jugó la vuelta de esa final, en Avellaneda?", options: ["12 de agosto de 1964", "6 de agosto de 1964", "20 de agosto de 1964", "1 de septiembre de 1964"], answer: 0 },
+                    { q: "¿Quién fue el goleador de la Copa Libertadores 1964 junto a Celino Mora de Cerro Porteño, con 6 goles?", options: ["Mario Rodríguez", "Raúl Savoy", "Raúl Bernao", "Luis Suárez"], answer: 0 },
+                    { q: "¿Qué histórico jugador argentino fichó Nacional de Uruguay como refuerzo estelar para la Libertadores 1964?", options: ["José Sanfilippo", "Ángel Labruna", "Antonio Rattín", "Norberto Menéndez"], answer: 0 },
+                    { q: "¿Cuántos goles convirtió Sanfilippo en 12 partidos durante la gira europea de Nacional previa a la final de 1964?", options: ["10", "6", "15", "4"], answer: 0 },
+                    { q: "¿En qué fecha exacta se reunieron los ocho fundadores de Independiente en el almacén de los hermanos Fuertes?", options: ["4 de agosto de 1904", "1 de enero de 1905", "25 de marzo de 1905", "12 de octubre de 1904"], answer: 0 },
+                    { q: "¿Cómo se llamaban los hermanos dueños del almacén donde se reunieron los fundadores de Independiente?", options: ["Telésforo y Policarpo Fuertes", "Antonio y Nicolás Cabana", "Luis y Nicolás Bassou", "Rosendo y Marcelo Degiorgi"], answer: 0 },
+                    { q: "¿Quiénes fueron dos de los vocales de la primera Comisión Directiva Provisoria de 1904?", options: ["Fernando Aizpuru y J.F. Ipart", "Antonio y Nicolás Cabana", "Luis y Nicolás Bassou", "Rosendo y Marcelo Degiorgi"], answer: 0 },
+                    { q: "¿En qué sección de la tienda 'A la Ciudad de Londres' trabajaba Rosendo Degiorgi?", options: ["Zapatería", "Modas", "Menaje", "Sastrería"], answer: 0 },
+                    { q: "¿En qué sección trabajaban los hermanos Cabana, otro grupo de los fundadores?", options: ["Modas", "Zapatería", "Menaje", "Sastrería"], answer: 0 },
+                    { q: "¿En qué año se había fundado el club de fútbol 'Maipo-Banfield', del que fueron excluidos los futuros fundadores de Independiente?", options: ["1903", "1900", "1905", "1898"], answer: 0 },
+                    { q: "¿En qué esquina porteña se había inaugurado en 1900 el local de la tienda 'A la Ciudad de Londres'?", options: ["Avenida de Mayo y Perú", "Corrientes y Callao", "Florida y Lavalle", "Rivadavia y Entre Ríos"], answer: 0 },
+                    { q: "¿Contra qué equipo perdió Independiente su debut en Copa Libertadores en 1961, por un global de 3 a 0?", options: ["Palmeiras", "Peñarol", "Santos", "Nacional"], answer: 0 },
+                    { q: "¿En qué año había sido campeón de Primera División Independiente antes de disputar su primera Copa Libertadores?", options: ["1960", "1958", "1962", "1963"], answer: 0 },
+                    { q: "¿Por qué resultado ganó Palmeiras en Avellaneda, en el partido de ida del debut de Independiente en la Libertadores 1961?", options: ["2 a 0", "1 a 0", "3 a 1", "0 a 0"], answer: 0 }
                 ],
                 socio: [ 
                     { q: "¿Cuál es la fecha de fundación oficial de Independiente?", options: ["1 de enero de 1905", "4 de agosto de 1904", "25 de mayo de 1903", "12 de octubre de 1905"], answer: 0 }, 
@@ -1111,7 +1370,25 @@
                     { q: "¿Con cuántos puntos fue campeón Independiente en el Torneo Apertura 2002?", options: ["40", "43", "45", "47"], answer: 1 }, 
                     { q: "¿Cómo se llamaba la tienda donde trabajaban los jóvenes fundadores del club?", options: ["Gath & Chaves", "Tienda A la Ciudad de Londres", "Harrods", "Tienda Los Gallegos"], answer: 1 },
                     { q: "¿Quién fue el primer presidente de la historia de Independiente?", options: ["Rosendo Degiorgi", "Aristides Langone", "Julio Grondona", "Pedro Iso"], answer: 0 },
-                    { q: "¿Qué histórico nombre acompañaba oficialmente al antiguo estadio 'La Doble Visera'?", options: ["Estadio Rey de Copas", "Estadio de Cemento", "Estadio Almirante Cordero", "Estadio Presidente Perón"], answer: 2 }
+                    { q: "¿Qué histórico nombre acompañaba oficialmente al antiguo estadio 'La Doble Visera'?", options: ["Estadio Rey de Copas", "Estadio de Cemento", "Estadio Almirante Cordero", "Estadio Presidente Perón"], answer: 2 },
+                    { q: "¿Quién fue el árbitro de la ida de la final de la Libertadores 1964, en Montevideo?", options: ["Leo Horn (Países Bajos)", "Dimas Larrosa (Paraguay)", "Arturo Yamasaki (Perú)", "Roque Cerullo (Argentina)"], answer: 0 },
+                    { q: "¿Cuántos espectadores presenciaron la ida de la final de 1964, en Montevideo?", options: ["60.000", "45.000", "80.000", "30.000"], answer: 0 },
+                    { q: "¿Por cuántos puntos de ventaja terminó Independiente su zona sobre Millonarios de Colombia en la Libertadores 1964?", options: ["3 unidades", "1 unidad", "5 unidades", "2 unidades"], answer: 0 },
+                    { q: "¿En qué dirección exacta se ubicaba el almacén donde se fundó Independiente, hoy parte de la Legislatura porteña?", options: ["Victoria (hoy Hipólito Yrigoyen) N° 584", "Rivadavia N° 1200", "Corrientes N° 800", "Belgrano N° 350"], answer: 0 },
+                    { q: "¿Qué frase pronunció uno de los jóvenes al rechazar la idea de unirse a Atlanta, dando origen al nombre del club?", options: ["'¡Qué Atlanta ni ocho cuartos!'", "'¡Nosotros somos los diablos!'", "'¡Fundemos algo propio!'", "'¡No queremos depender de nadie!'"], answer: 0 },
+                    { q: "¿Dónde se estableció la primera sede social de Independiente, cedida por la familia de su fundador?", options: ["Una habitación en la casa de los Degiorgi", "Un local alquilado en Avellaneda", "El propio almacén de los Fuertes", "Una carpa en un potrero"], answer: 0 },
+                    { q: "¿Hasta qué fecha ejerció Rosendo Degiorgi como primer presidente provisorio de Independiente?", options: ["25 de marzo de 1905", "1 de enero de 1905", "4 de agosto de 1904", "31 de diciembre de 1905"], answer: 0 },
+                    { q: "¿Con qué elementos básicos comenzó a funcionar la primera comisión directiva de Independiente en 1904?", options: ["Una pelota de fútbol y un sello de goma", "Una pelota y un botiquín", "Un mástil y una bandera", "Un libro de actas y una campana"], answer: 0 },
+                    { q: "¿En qué fecha exacta se jugó el partido de ida de la final de la Libertadores 1965, en Avellaneda?", options: ["9 de abril de 1965", "12 de abril de 1965", "15 de abril de 1965", "1 de mayo de 1965"], answer: 0 },
+                    { q: "¿En qué fecha exacta se jugó la vuelta de esa final, en Montevideo?", options: ["12 de abril de 1965", "9 de abril de 1965", "15 de abril de 1965", "20 de abril de 1965"], answer: 0 },
+                    { q: "¿Aproximadamente cuántos espectadores presenciaron cada uno de los partidos de ida y vuelta de la final de 1965?", options: ["45.000", "60.000", "30.000", "80.000"], answer: 0 },
+                    { q: "¿Quién fue el árbitro que dirigió los tres partidos (ida, vuelta y desempate) de la final de la Libertadores 1965?", options: ["Arturo Yamasaki", "Leo Horn", "Dimas Larrosa", "Roque Cerullo"], answer: 0 },
+                    { q: "¿Cuántas ediciones de la Copa Libertadores se habían disputado sin título argentino antes del de Independiente en 1964?", options: ["4", "2", "6", "1"], answer: 0 },
+                    { q: "¿Cuánto pagaban de cuota los jóvenes fundadores en el club de la tienda, motivo de su reclamo por ser excluidos del equipo?", options: ["50 centavos, igual que los mayores", "25 centavos, la mitad que los mayores", "Nada, jugaban gratis", "1 peso, el doble que los mayores"], answer: 0 },
+                    { q: "¿Por qué motivo fueron excluidos los jóvenes fundadores del equipo de fútbol 'Maipo-Banfield'?", options: ["Por ser considerados demasiado chicos para jugar", "Por no pagar la cuota social", "Por trabajar en otra sección de la tienda", "Por vivir lejos de la cancha"], answer: 0 },
+                    { q: "¿Por qué resultado global perdió Independiente su debut en Copa Libertadores de 1961 ante Palmeiras?", options: ["0 a 3", "1 a 2", "0 a 2", "1 a 4"], answer: 0 },
+                    { q: "¿Por qué resultado ganó Palmeiras la revancha en el Pacaembú de ese debut de 1961?", options: ["1 a 0", "2 a 0", "3 a 1", "1 a 1"], answer: 0 },
+                    { q: "¿Cuántos equipos participaron en la Copa Libertadores 1964, la edición que ganó Independiente por primera vez?", options: ["11", "8", "14", "6"], answer: 0 }
                 ]
             },
             "Racing": {
@@ -1122,7 +1399,25 @@
                     { q: "¿Cómo se llama el predio de entrenamiento de Racing?", options: ["Predio Tita Mattiussi", "Villa Olímpica", "Casa Amarilla", "River Camp"], answer: 0 }, 
                     { q: "¿En qué ciudad se encuentra el club?", options: ["Buenos Aires", "Avellaneda", "Rosario", "La Plata"], answer: 1 },
                     { q: "¿De qué colores es su camiseta tradicional?", options: ["Rojo y Blanco", "Celeste y Blanco", "Azul y Oro", "Negro y Blanco"], answer: 1 },
-                    { q: "¿A qué famoso actor argentino se lo asocia como hincha fanático?", options: ["Ricardo Darín", "Guillermo Francella", "Adrián Suar", "Diego Peretti"], answer: 1 }
+                    { q: "¿A qué famoso actor argentino se lo asocia como hincha fanático?", options: ["Ricardo Darín", "Guillermo Francella", "Adrián Suar", "Diego Peretti"], answer: 1 },
+                    { q: "¿De qué país era Arturo Artola, primer presidente de Racing?", options: ["Uruguay", "Argentina", "España", "Chile"], answer: 0 },
+                    { q: "¿Cómo se llamaba el club que se fusionó con Colorados Unidos del Sud para formar Racing en 1903?", options: ["Barracas al Sur", "Estudiantil Porteño", "Defensores de Belgrano", "Colegiales"], answer: 0 },
+                    { q: "¿En qué revista se inspiró Germán Vidaillac para proponer el nombre 'Racing' en 1903?", options: ["Una revista francesa de automovilismo", "Un diario deportivo inglés", "Una revista italiana de ciclismo", "Un almanaque español"], answer: 0 },
+                    { q: "¿Contra qué equipo venció Racing 2-1 para ascender a Primera División en 1910?", options: ["Boca Juniors", "River Plate", "Independiente", "San Isidro"], answer: 0 },
+                    { q: "¿Contra qué equipo debutó Racing en Primera División en 1911, con un empate 1-1?", options: ["San Isidro", "Boca Juniors", "Estudiantes", "Belgrano Athletic"], answer: 0 },
+                    { q: "¿Quién es considerado el entrenador más ganador en la historia de Racing?", options: ["Guillermo Stábile", "Juan José Pizzuti", "Alfio Basile", "Reinaldo Merlo"], answer: 0 },
+                    { q: "¿En qué años logró Racing su primer tricampeonato en la máxima categoría?", options: ["1949, 1950 y 1951", "1913, 1914 y 1915", "1958, 1959 y 1960", "2001, 2002 y 2003"], answer: 0 },
+                    { q: "¿Contra qué equipo ganó Racing la Copa de Competencia Británica de 1945?", options: ["Boca Juniors", "River Plate", "Independiente", "San Lorenzo"], answer: 0 },
+                    { q: "¿Cuántos goles hizo Alberto Ohaco en Racing, según la cifra más citada de su carrera?", options: ["244", "198", "201", "220"], answer: 0 },
+                    { q: "¿Cuántos partidos jugó Alberto Ohaco en Racing?", options: ["278", "250", "300", "230"], answer: 0 },
+                    { q: "¿Cuántos partidos jugó Natalio Perinetti, el jugador con más presencias del club?", options: ["405", "350", "450", "380"], answer: 0 },
+                    { q: "¿Qué compañero de ataque de Ohaco es el segundo goleador histórico de Racing?", options: ["Alberto Marcovecchio", "Evaristo Barrera", "Juan José Pizzuti", "Llamil Simes"], answer: 0 },
+                    { q: "¿Quién es el máximo goleador de Racing en la era profesional?", options: ["Evaristo Barrera", "Juan José Pizzuti", "Diego Milito", "Lisandro López"], answer: 0 },
+                    { q: "¿Quién redactó el acta que oficializó la creación de Racing Football Club en 1904?", options: ["Alejandro Carbone", "Arturo Artola", "Germán Vidaillac", "Pedro Werner"], answer: 0 },
+                    { q: "¿En qué año se afilió Racing a la AFA, dos años después de su fundación?", options: ["1905", "1903", "1908", "1910"], answer: 0 },
+                    { q: "¿Por qué tuvo que cambiarse la segunda camiseta de Racing, a bastones negros y amarillos, luego de solo una semana de uso?", options: ["Por su parecido con la de Peñarol de Uruguay", "Por su parecido con la de Boca Juniors", "Porque se decoloraba muy rápido", "Por pedido de la AFA"], answer: 0 },
+                    { q: "¿De qué colores era la camiseta que reemplazó a la de bastones negros y amarillos, usada hasta 1910?", options: ["Celeste y salmón a cuadros", "Verde y blanca a rayas", "Roja lisa", "Azul y oro"], answer: 0 },
+                    { q: "¿En honor a qué hecho histórico se adoptó la actual camiseta celeste y blanca de Racing, en 1910?", options: ["El centenario de la Primera Junta", "El centenario de la independencia", "Los 100 años de Avellaneda", "La fundación de la AFA"], answer: 0 }
                 ],
                 medio: [ 
                     { q: "¿Por qué Racing es históricamente 'El Primer Grande'?", options: ["Por ser el primero en tener estadio", "Por el Heptacampeonato amateur", "Por ganar la primera Libertadores", "Por sus colores"], answer: 1 }, 
@@ -1131,7 +1426,25 @@
                     { q: "¿Qué frase popularizó su DT en el campeonato de 2001?", options: ["A lo Boca", "Paso a paso", "El equipo de José", "La guardia alta"], answer: 1 }, 
                     { q: "¿Cuántos torneos consecutivos ganó en el recordado heptacampeonato amateur?", options: ["5", "6", "7", "8"], answer: 2 },
                     { q: "¿Qué ídolo regresó al club y lo sacó campeón en 2014?", options: ["Lisandro López", "Diego Milito", "Lautaro Martínez", "Claudio Úbeda"], answer: 1 },
-                    { q: "¿A quién venció en la final del Trofeo de Campeones 2022?", options: ["Boca Juniors", "River Plate", "Tigre", "Independiente"], answer: 0 }
+                    { q: "¿A quién venció en la final del Trofeo de Campeones 2022?", options: ["Boca Juniors", "River Plate", "Tigre", "Independiente"], answer: 0 },
+                    { q: "¿En qué año se fundó el club 'Barracas al Sur', una de las dos instituciones que dieron origen a Racing?", options: ["1901", "1899", "1903", "1905"], answer: 0 },
+                    { q: "¿En qué año se fundó 'Colorados Unidos del Sud', la otra institución fundadora de Racing?", options: ["1902", "1900", "1904", "1898"], answer: 0 },
+                    { q: "¿Quién fue el primer presidente de 'Barracas al Sur', antes de la fusión que creó Racing?", options: ["Pedro S. Werner", "Arturo Artola", "Alfredo Lamour", "Salvador Sohorondo"], answer: 0 },
+                    { q: "¿Quién fue el tesorero elegido junto a Arturo Artola en la fundación de Racing en 1903?", options: ["Francisco Balestrieri", "Alejandro Carbone", "Germán Vidaillac", "Niceto Barrios"], answer: 0 },
+                    { q: "¿En qué finca porteña se redactó el acta fundacional de Racing, en 1904?", options: ["La finca de los hermanos Lamoure", "La finca de los hermanos Fuertes", "La finca de los Degiorgi", "La finca de los Werner"], answer: 0 },
+                    { q: "¿Con qué número de socio quedó registrado Arturo Artola en Racing?", options: ["Socio número 11", "Socio número 1", "Socio número 25", "Socio número 50"], answer: 0 },
+                    { q: "¿Por qué motivo dejó Arturo Artola la presidencia de Racing en septiembre de 1903?", options: ["Por un traslado laboral a Santiago del Estero", "Por una discusión con la comisión", "Por motivos de salud", "Por mudarse a Uruguay"], answer: 0 },
+                    { q: "¿De qué manera fue elegido Arturo Artola como primer presidente de Racing, según cuenta la historia del club?", options: ["Los socios escribieron un nombre en un papel dentro de un sombrero", "Por votación a mano alzada", "Por decisión de los fundadores mayores", "Por sorteo con una moneda"], answer: 0 },
+                    { q: "¿Cuántos títulos oficiales logró Alberto Ohaco como jugador de Racing?", options: ["20", "15", "25", "12"], answer: 0 },
+                    { q: "¿Cuántos títulos ganó Alberto Marcovecchio con Racing, la misma cantidad que Ohaco?", options: ["20", "15", "18", "10"], answer: 0 },
+                    { q: "¿En qué certamen internacional con la Selección Argentina jugó Marcovecchio en 1916?", options: ["La Copa América", "El Mundial", "Los Juegos Olímpicos", "La Copa Newton"], answer: 0 },
+                    { q: "¿En qué años fue Alberto Ohaco goleador del campeonato de forma consecutiva?", options: ["1912, 1913, 1914 y 1915", "1916, 1917, 1918 y 1919", "1911, 1912 y 1913", "1913 y 1919"], answer: 0 },
+                    { q: "¿Cuántos goles hizo Evaristo Barrera en sus 142 partidos con Racing?", options: ["136", "118", "150", "106"], answer: 0 },
+                    { q: "¿Entre qué años jugó Evaristo Barrera en Racing, siendo el goleador de la era profesional?", options: ["1933 y 1938", "1940 y 1945", "1925 y 1930", "1950 y 1955"], answer: 0 },
+                    { q: "¿Cuántos partidos y goles registró Alberto Marcovecchio en su etapa en Racing?", options: ["229 partidos y 207 goles", "200 partidos y 150 goles", "250 partidos y 180 goles", "180 partidos y 130 goles"], answer: 0 },
+                    { q: "¿A qué edad debutó Alberto Ohaco en Primera con Racing, en 1911?", options: ["18 años", "16 años", "20 años", "22 años"], answer: 0 },
+                    { q: "¿Qué célebre presidente argentino fue reconocido hincha de Racing, dándole nombre a su estadio?", options: ["Juan Domingo Perón", "Arturo Frondizi", "Hipólito Yrigoyen", "Raúl Alfonsín"], answer: 0 },
+                    { q: "¿En qué fecha exacta debutó Racing en Primera División, con un empate 1-1 ante San Isidro?", options: ["7 de mayo de 1911", "18 de diciembre de 1910", "25 de marzo de 1911", "1 de enero de 1911"], answer: 0 }
                 ],
                 dificil: [ 
                     { q: "¿A qué equipo europeo venció en la Copa Intercontinental 1967?", options: ["Manchester United", "Real Madrid", "Celtic", "Benfica"], answer: 2 }, 
@@ -1140,16 +1453,52 @@
                     { q: "¿Contra qué equipo jugó el partido que le dio el campeonato en 2001?", options: ["River Plate", "Vélez", "Boca Juniors", "San Lorenzo"], answer: 1 }, 
                     { q: "¿En qué año se inauguró el Estadio Presidente Perón?", options: ["1945", "1950", "1955", "1960"], answer: 1 },
                     { q: "¿Quién anotó el gol decisivo frente a Cruzeiro en la Supercopa 1988?", options: ["Rubén Paz", "Omar Catalán", "Toti Iglesias", "Néstor Fabbri"], answer: 1 },
-                    { q: "¿Qué histórico jugador fue bautizado 'El Marqués'?", options: ["Humberto Maschio", "Rubén Sosa", "Roberto Perfumo", "Rubén Capria"], answer: 2 }
+                    { q: "¿Qué histórico jugador fue bautizado 'El Marqués'?", options: ["Humberto Maschio", "Rubén Sosa", "Roberto Perfumo", "Rubén Capria"], answer: 2 },
+                    { q: "¿En qué fecha exacta se fusionaron Barracas al Sur y Colorados Unidos del Sud para formar Racing?", options: ["25 de marzo de 1903", "12 de mayo de 1901", "16 de marzo de 1902", "7 de febrero de 1904"], answer: 0 },
+                    { q: "¿En qué estación ferroviaria se gestó la reunión que llevó a la fusión de 1903?", options: ["Barracas Iglesia", "Constitución", "Once", "Retiro"], answer: 0 },
+                    { q: "¿Quién fue el jefe de estación que ofició de mediador para lograr la fusión de 1903?", options: ["Niceto Barrios", "Alejandro Carbone", "Germán Vidaillac", "Pedro Werner"], answer: 0 },
+                    { q: "¿Cuántos socios y cuánto dinero aportó Colorados Unidos del Sud a la fusión de 1903?", options: ["34 socios y 19,65 pesos", "20 socios y 10 pesos", "50 socios y 30 pesos", "11 socios y 16,35 pesos"], answer: 0 },
+                    { q: "¿Cuántos socios y cuánto dinero aportó Barracas al Sur a esa misma fusión?", options: ["11 socios y 16,35 pesos", "34 socios y 19,65 pesos", "25 socios y 20 pesos", "15 socios y 12 pesos"], answer: 0 },
+                    { q: "¿Qué cuota mensual se fijó para los socios de Racing tras su fundación en 1903?", options: ["50 centavos", "25 centavos", "1 peso", "10 centavos"], answer: 0 },
+                    { q: "¿En qué fecha exacta se fundó el club 'Barracas al Sur', origen de Racing?", options: ["12 de mayo de 1901", "25 de marzo de 1903", "16 de marzo de 1902", "1 de enero de 1900"], answer: 0 },
+                    { q: "¿En qué fecha exacta se escindió el grupo que formó 'Colorados Unidos del Sud'?", options: ["16 de marzo de 1902", "12 de mayo de 1901", "25 de marzo de 1903", "7 de febrero de 1904"], answer: 0 },
+                    { q: "¿En qué fecha exacta se redactó el acta que oficializó la creación de Racing Football Club?", options: ["7 de febrero de 1904", "25 de marzo de 1903", "16 de marzo de 1902", "12 de mayo de 1901"], answer: 0 },
+                    { q: "¿Cuál fue el motivo original de la escisión que dio origen a Colorados Unidos del Sud en 1902?", options: ["Una disputa por los colores de la camiseta", "Una disputa por la sede social", "Una disputa por el nombre del club", "Una disputa por la cuota social"], answer: 0 },
+                    { q: "¿Qué colores de camiseta proponía el presidente de la institución, generando la disputa de 1902?", options: ["Negro y amarillo", "Celeste y blanco", "Rojo y azul", "Verde y blanco"], answer: 0 },
+                    { q: "¿Qué color de camiseta proponía el otro grupo de socios en esa disputa de 1902?", options: ["Colorada (roja)", "Azul", "Verde", "Amarilla"], answer: 0 },
+                    { q: "¿Cuál fue el promedio de goles por partido de Alberto Ohaco en su carrera en Racing?", options: ["Cerca de 0,88", "Cerca de 0,50", "Cerca de 1,20", "Cerca de 0,30"], answer: 0 },
+                    { q: "¿Cuántos Campeonatos de Primera División ganó Ohaco como jugador, en la era amateur?", options: ["8", "5", "10", "6"], answer: 0 },
+                    { q: "¿Cuántas Copas Nacionales ganó Ohaco durante su carrera en Racing?", options: ["9", "5", "12", "3"], answer: 0 },
+                    { q: "¿Con qué resultado ascendió Racing a Primera División en 1910, tras vencer a Boca Juniors en la final de Segunda?", options: ["2 a 1", "3 a 0", "1 a 0", "4 a 2"], answer: 0 },
+                    { q: "¿Qué frase pronunció Arturo Artola al dejar la presidencia de Racing en 1903, previendo la grandeza futura del club?", options: ["'Racing será muy grande, lo presiento'", "'Este club llegará lejos'", "'Somos la Academia del fútbol'", "'Volveré para verlo campeón'"], answer: 0 },
+                    { q: "¿Cuántos campeonatos locales ganó Racing durante toda la era amateur, sumando el heptacampeonato y otros dos títulos?", options: ["9", "7", "11", "5"], answer: 0 }
                 ],
                 socio: [ 
                     { q: "¿Cuál es la fecha de fundación oficial de Racing?", options: ["25 de marzo de 1903", "1 de enero de 1905", "15 de agosto de 1904", "12 de octubre de 1903"], answer: 0 }, 
                     { q: "¿Cuál es el verdadero nombre de 'El Cilindro'?", options: ["Estadio Juan José Pizzuti", "Estadio Presidente Perón", "Estadio Ciudad de Avellaneda", "Estadio Academia"], answer: 1 }, 
                     { q: "¿Quién hizo el histórico gol contra el Celtic en Montevideo (1967)?", options: ["Humberto Maschio", "Alfio Basile", "Juan Carlos Cárdenas", "Roberto Perfumo"], answer: 2 }, 
                     { q: "¿De qué colores era la primera camiseta de Racing antes del celeste y blanco?", options: ["Roja y Azul", "Celeste y Blanca", "A cuadros negros y amarillos", "Blanca pura"], answer: 3 }, 
-                    { q: "¿Quién fue el primer presidente institucional de Racing Club?", options: ["Arturo Giro", "Alejandro Carbone", "Pedro Werner", "Luis Carbone"], answer: 0 },
+                    { q: "¿Quién fue el primer presidente institucional de Racing Club?", options: ["Arturo Artola", "Arturo Giró", "Alejandro Carbone", "Luis Carbone"], answer: 0 },
                     { q: "¿Quién compuso la marcha oficial de Racing Club?", options: ["Carlos Gardel", "Vicente Scaglione", "Aníbal Troilo", "Astor Piazzolla"], answer: 1 },
-                    { q: "¿En qué barrio exacto se fundó originalmente Racing Club antes de instalarse definitivamente?", options: ["La Boca", "Barracas al Sur (Avellaneda)", "Retiro", "Boedo"], answer: 1 }
+                    { q: "¿En qué barrio exacto se fundó originalmente Racing Club antes de instalarse definitivamente?", options: ["La Boca", "Barracas al Sur (Avellaneda)", "Retiro", "Boedo"], answer: 1 },
+                    { q: "¿Qué requisito imprescindible se pedía para ser socio de 'Barracas al Sur' en su fundación de 1901?", options: ["Ser jugador del equipo ('footballer')", "Pagar una cuota anual", "Vivir en el barrio", "Ser mayor de edad"], answer: 0 },
+                    { q: "¿Quién fue el secretario de 'Barracas al Sur' en su fundación de 1901?", options: ["Alfredo Lamour", "Salvador Sohorondo", "Pedro Werner", "Niceto Barrios"], answer: 0 },
+                    { q: "¿Quién fue el tesorero de 'Barracas al Sur' en su fundación de 1901?", options: ["Salvador Sohorondo", "Alfredo Lamour", "Pedro Werner", "Francisco Balestrieri"], answer: 0 },
+                    { q: "¿En qué predio histórico jugaba Racing en sus primeros años, antes de su estadio actual?", options: ["Alsina y Colón", "Plaza Solís", "Parque Patricios", "Villa Crespo"], answer: 0 },
+                    { q: "¿En qué esquina exacta se ubicaba la estación Barracas Iglesia, donde trabajaba Artola?", options: ["Palaa y Maipú", "Corrientes y Callao", "Rivadavia y Entre Ríos", "Independencia y Boedo"], answer: 0 },
+                    { q: "¿Quién fue el otro presidente no argentino en la historia de Racing, además de Artola?", options: ["Víctor Blanco (español)", "Pedro Werner (uruguayo)", "Germán Vidaillac (francés)", "Alejandro Carbone (italiano)"], answer: 0 },
+                    { q: "¿Cuántos presidentes tuvo Racing entre 1903 y 2025, según el archivo histórico del club?", options: ["37", "25", "50", "20"], answer: 0 },
+                    { q: "¿Quién es el presidente que más tiempo ejerció el cargo en Racing, con seis períodos distintos?", options: ["Luis Carbone", "Arturo Giró", "Arturo Artola", "Julio Planisi"], answer: 0 },
+                    { q: "¿Cuántos títulos logró Arturo Giró, el presidente más exitoso en la historia de Racing?", options: ["12", "8", "15", "5"], answer: 0 },
+                    { q: "¿Cómo se descompone el palmarés de 12 títulos logrados durante la gestión de Arturo Giró?", options: ["2 campeonatos, 7 copas nacionales y 3 copas internacionales", "5 campeonatos y 7 copas nacionales", "3 campeonatos, 4 copas nacionales y 5 internacionales", "1 campeonato y 11 copas nacionales"], answer: 0 },
+                    { q: "¿Entre qué años Racing no contó con un presidente formal, tras la quiebra del club?", options: ["1999 a 2008", "1990 a 1995", "2001 a 2003", "1985 a 1990"], answer: 0 },
+                    { q: "¿Quién fue el primer presidente de la era profesional de Racing, elegido en 1929?", options: ["Julio Planisi", "Arturo Giró", "Luis Carbone", "Arturo Artola"], answer: 0 },
+                    { q: "¿Cuántas Copas de Honor de la Municipalidad de Buenos Aires ganó Alberto Ohaco en su carrera?", options: ["4", "2", "6", "1"], answer: 0 },
+                    { q: "¿Cuántas Copas Dr. Carlos Ibarguren ganó Ohaco durante su carrera en Racing?", options: ["4", "2", "6", "3"], answer: 0 },
+                    { q: "¿Cuántas Copas Internacionales (AFA/AUF) ganó Ohaco como jugador de Racing?", options: ["3", "1", "5", "2"], answer: 0 },
+                    { q: "¿Qué copa ganó Ohaco además de las mencionadas, disputada ante el Jockey Club?", options: ["La Copa de Competencia Jockey Club", "La Copa de Honor Cousenier", "La Cup Tie Competition", "La Copa Ibarguren"], answer: 0 },
+                    { q: "¿Cuántas Copas de Honor Cousenier ganó Ohaco en su carrera con Racing?", options: ["2", "1", "4", "3"], answer: 0 },
+                    { q: "¿Cuántas Cup Tie Competition ganó Ohaco durante su carrera en Racing?", options: ["1", "2", "3", "0"], answer: 0 }
                 ]
             },
             "San Lorenzo": {
@@ -1160,7 +1509,25 @@
                     { q: "¿Qué Papa es hincha fanático y socio del club?", options: ["Juan Pablo II", "Benedicto XVI", "Francisco", "Pío XII"], answer: 2 }, 
                     { q: "¿De qué colores es la camiseta tradicional?", options: ["Azul y Grana", "Rojo y Blanco", "Celeste y Blanco", "Negro y Blanco"], answer: 0 },
                     { q: "¿En qué barrio tradicional porteño nació el club?", options: ["Palermo", "Boedo", "Flores", "La Paternal"], answer: 1 },
-                    { q: "¿Qué actor internacional apoya públicamente al club?", options: ["Viggo Mortensen", "Leonardo DiCaprio", "Brad Pitt", "Johnny Depp"], answer: 0 }
+                    { q: "¿Qué actor internacional apoya públicamente al club?", options: ["Viggo Mortensen", "Leonardo DiCaprio", "Brad Pitt", "Johnny Depp"], answer: 0 },
+                    { q: "¿Quién fue el entrenador de San Lorenzo campeón de la Copa Libertadores 2014?", options: ["Edgardo Bauza", "Rubén Darío Insúa", "Diego Aguirre", "Pipo Gorosito"], answer: 0 },
+                    { q: "¿Contra qué equipo paraguayo ganó San Lorenzo la final de la Libertadores 2014?", options: ["Nacional", "Cerro Porteño", "Libertad", "Olimpia"], answer: 0 },
+                    { q: "¿Quién anotó el gol de San Lorenzo en el partido de ida de esa final, en Asunción?", options: ["Mauro Matos", "Néstor Ortigoza", "Leandro Romagnoli", "Julio Buffarini"], answer: 0 },
+                    { q: "¿A qué equipo boliviano goleó San Lorenzo 5-0 en semifinales rumbo a la Libertadores 2014?", options: ["Bolívar", "The Strongest", "Oriente Petrolero", "San José"], answer: 0 },
+                    { q: "¿Contra qué equipo brasileño eliminó San Lorenzo en octavos de final de la Libertadores 2014, por penales?", options: ["Grêmio", "Cruzeiro", "Internacional", "Palmeiras"], answer: 0 },
+                    { q: "¿Contra qué equipo brasileño eliminó San Lorenzo en cuartos de final de la Libertadores 2014?", options: ["Cruzeiro", "Grêmio", "Santos", "Atlético Mineiro"], answer: 0 },
+                    { q: "¿Cuántos goles hizo Héctor Scotta en 1975, un récord del fútbol argentino que sigue vigente?", options: ["60", "50", "55", "65"], answer: 0 },
+                    { q: "¿A qué histórico goleador paraguayo superó Scotta con su récord de goles en un año?", options: ["Arsenio Erico", "Delfín Benítez Cáceres", "José Sanfilippo", "Herminio Masantonio"], answer: 0 },
+                    { q: "¿De qué país es el club Atlético Nacional, al que San Lorenzo venció en la final de la Sudamericana 2002?", options: ["Colombia", "Ecuador", "Venezuela", "Perú"], answer: 0 },
+                    { q: "¿Quién fue el entrenador de San Lorenzo en la obtención de la Copa Sudamericana 2002?", options: ["Rubén Darío Insúa", "Edgardo Bauza", "Héctor Veira", "Ramón Díaz"], answer: 0 },
+                    { q: "¿Por qué definición se resolvió la final de la Copa Mercosur 2001 ante Flamengo?", options: ["Por penales", "Por gol de visitante", "Por diferencia de goles", "Por sorteo"], answer: 0 },
+                    { q: "¿Cómo se apoda al histórico jugador uruguayo Sergio Villar, récord de partidos en el club?", options: ["El Sapo", "El Tano", "El Gringo", "El Pipi"], answer: 0 },
+                    { q: "¿De qué país era el defensor Sergio Villar, récord de presencias en San Lorenzo?", options: ["Uruguay", "Paraguay", "Chile", "Brasil"], answer: 0 },
+                    { q: "¿En qué año debutó Sergio Villar en San Lorenzo?", options: ["1968", "1965", "1970", "1972"], answer: 0 },
+                    { q: "¿En qué estadio se jugó la ida de la Copa Mercosur 2001 ante Flamengo?", options: ["Maracaná", "Morumbí", "Mineirão", "Vila Belmiro"], answer: 0 },
+                    { q: "¿En qué estadio se definió por penales la final de la Copa Mercosur 2001?", options: ["Nuevo Gasómetro", "La Bombonera", "El Monumental", "José Amalfitani"], answer: 0 },
+                    { q: "¿A qué equipo venezolano venció San Lorenzo camino a semifinales de la Sudamericana 2002, con un contundente 8-1 global?", options: ["Monagas", "Zamora", "Caracas FC", "Deportivo Táchira"], answer: 0 },
+                    { q: "¿A qué equipo colombiano eliminó San Lorenzo en la segunda ronda de la Copa Sudamericana 2002?", options: ["América de Cali", "Millonarios", "Junior", "Independiente Santa Fe"], answer: 0 }
                 ],
                 medio: [ 
                     { q: "¿En qué año ganó su única Copa Libertadores de América?", options: ["2010", "2012", "2014", "2016"], answer: 2 }, 
@@ -1169,7 +1536,25 @@
                     { q: "¿En qué torneo logró el récord de ser el primer campeón invicto (1968)?", options: ["Torneo Nacional", "Torneo Metropolitano", "Campeonato de Primera", "Copa Argentina"], answer: 1 }, 
                     { q: "¿A qué equipo enfrentó en la final del Mundial de Clubes 2014?", options: ["Barcelona", "Real Madrid", "Bayern Munich", "Chelsea"], answer: 1 },
                     { q: "¿Qué ídolo apodado 'Pipi' es considerado uno de los mayores emblemas del club?", options: ["Leandro Romagnoli", "Néstor Ortigoza", "Pablo Barrientos", "Héctor Villalba"], answer: 0 },
-                    { q: "¿A quién venció en la final de la Copa Sudamericana 2002?", options: ["Pachuca", "Atlético Nacional", "Bolívar", "Colo Colo"], answer: 1 }
+                    { q: "¿A quién venció en la final de la Copa Sudamericana 2002?", options: ["Pachuca", "Atlético Nacional", "Bolívar", "Colo Colo"], answer: 1 },
+                    { q: "¿Con qué resultado ganó San Lorenzo el partido de vuelta de la final 2014, en su propio estadio?", options: ["1 a 0", "2 a 0", "1 a 1", "2 a 1"], answer: 0 },
+                    { q: "¿Quién anotó el gol de la igualada para Nacional en la ida de la final 2014?", options: ["Julio Santa Cruz", "Julio dos Santos", "Nicolás Olivera", "Édgar Benítez"], answer: 0 },
+                    { q: "¿En qué estadio se jugó la ida de la final de la Libertadores 2014?", options: ["Estadio Defensores del Chaco", "Estadio La Nueva Olla", "Estadio Antonio Aranda", "Estadio Río Parapití"], answer: 0 },
+                    { q: "¿Qué lugar ocupó San Lorenzo entre los equipos argentinos en ganar la Copa Libertadores?", options: ["El octavo", "El quinto", "El sexto", "El séptimo"], answer: 0 },
+                    { q: "¿Qué otro club había dirigido Edgardo Bauza a un título de Copa Libertadores antes que a San Lorenzo?", options: ["LDU de Quito", "Liga de Loja", "Barcelona SC", "Emelec"], answer: 0 },
+                    { q: "¿En cuántos partidos convirtió Héctor Scotta sus 60 goles de 1975?", options: ["57", "50", "62", "45"], answer: 0 },
+                    { q: "¿Cuántos de esos 60 goles convirtió en el Torneo Metropolitano de 1975?", options: ["32", "28", "35", "25"], answer: 0 },
+                    { q: "¿Cuántos convirtió en el Torneo Nacional de 1975?", options: ["28", "32", "20", "35"], answer: 0 },
+                    { q: "¿Contra qué equipo hizo Scotta el gol que batió el récord histórico, en noviembre de 1975?", options: ["Boca Juniors", "River Plate", "Racing", "Vélez Sarsfield"], answer: 0 },
+                    { q: "¿Con qué resultado global venció San Lorenzo a Atlético Nacional en la final de la Sudamericana 2002?", options: ["4 a 0", "3 a 1", "2 a 0", "5 a 2"], answer: 0 },
+                    { q: "¿Dónde se jugó el partido de ida de esa final, en Colombia?", options: ["Medellín", "Bogotá", "Cali", "Barranquilla"], answer: 0 },
+                    { q: "¿Cómo terminó el partido de vuelta de la final de la Sudamericana 2002 en el Nuevo Gasómetro?", options: ["0 a 0", "1 a 1", "2 a 1", "1 a 0"], answer: 0 },
+                    { q: "¿Por qué resultado en penales ganó San Lorenzo la final de la Copa Mercosur 2001 ante Flamengo?", options: ["4 a 3", "5 a 4", "3 a 2", "4 a 2"], answer: 0 },
+                    { q: "¿Cómo terminaron los dos partidos de esa final antes de la definición por penales?", options: ["0 a 0 y 1 a 1", "1 a 1 y 2 a 2", "0 a 0 y 0 a 0", "1 a 0 y 0 a 1"], answer: 0 },
+                    { q: "¿Cuántos partidos oficiales jugó Sergio Villar en San Lorenzo, un récord del club?", options: ["446", "400", "480", "350"], answer: 0 },
+                    { q: "¿Cuántos años jugó Sergio Villar en San Lorenzo?", options: ["13", "10", "15", "8"], answer: 0 },
+                    { q: "¿Contra qué equipo debutó Sergio Villar en San Lorenzo en 1968, con un triunfo 5-1?", options: ["Atlanta", "All Boys", "Chacarita", "Platense"], answer: 0 },
+                    { q: "¿Cuántos títulos oficiales ganó Sergio Villar con la camiseta de San Lorenzo?", options: ["4", "2", "6", "3"], answer: 0 }
                 ],
                 dificil: [ 
                     { q: "¿Quién hizo el gol de penal en la final de la Libertadores 2014?", options: ["Leandro Romagnoli", "Mauro Matos", "Néstor Ortigoza", "Julio Buffarini"], answer: 2 }, 
@@ -1178,7 +1563,25 @@
                     { q: "¿Cuántos goles hizo Héctor Scotta en un solo año calendario (récord en 1975)?", options: ["40", "50", "60", "70"], answer: 2 }, 
                     { q: "¿En qué año logró ser bicampeón de primera división?", options: ["1959", "1972", "1995", "2001"], answer: 1 },
                     { q: "¿Cómo se llamaba el emblemático equipo campeón invicto de 1972?", options: ["La Máquina", "Los Camboyanos", "Los Matadores", "Los Carasucias"], answer: 2 },
-                    { q: "¿Qué jugador histórico tiene el apodo de 'El Nene'?", options: ["José Sanfilippo", "Héctor Scotta", "Narciso Doval", "Walter Perazzo"], answer: 0 }
+                    { q: "¿Qué jugador histórico tiene el apodo de 'El Nene'?", options: ["José Sanfilippo", "Héctor Scotta", "Narciso Doval", "Walter Perazzo"], answer: 0 },
+                    { q: "¿Cómo quedó el global de la serie de octavos de la Libertadores 2014 ante Grêmio, antes de los penales?", options: ["1 a 1", "0 a 0", "2 a 2", "1 a 0"], answer: 0 },
+                    { q: "¿Por qué resultado en penales avanzó San Lorenzo ante Grêmio en los octavos de la Libertadores 2014?", options: ["4 a 2", "5 a 4", "3 a 1", "4 a 3"], answer: 0 },
+                    { q: "¿Con qué resultado global avanzó San Lorenzo a semifinales tras vencer a Cruzeiro en cuartos de 2014?", options: ["2 a 1", "3 a 1", "1 a 0", "2 a 0"], answer: 0 },
+                    { q: "¿Cuántos goles le convirtió San Lorenzo a Bolívar en la semifinal de la Libertadores 2014, en Buenos Aires?", options: ["5", "4", "3", "6"], answer: 0 },
+                    { q: "¿En qué fecha exacta se jugó la ida de la final de la Libertadores 2014 en Asunción?", options: ["6 de agosto de 2014", "13 de agosto de 2014", "30 de julio de 2014", "20 de agosto de 2014"], answer: 0 },
+                    { q: "¿En qué fecha exacta se jugó la vuelta de la final de la Libertadores 2014 en Buenos Aires?", options: ["13 de agosto de 2014", "6 de agosto de 2014", "20 de agosto de 2014", "27 de agosto de 2014"], answer: 0 },
+                    { q: "¿Cuántos goles convirtió Scotta de cabeza durante su histórica temporada de 1975?", options: ["4", "2", "6", "8"], answer: 0 },
+                    { q: "¿Cuántos goles convirtió Scotta de penal durante esa temporada de 1975?", options: ["2", "4", "6", "1"], answer: 0 },
+                    { q: "¿Contra qué equipo hizo Héctor Scotta sus dos últimos goles para llegar a 60 en 1975?", options: ["Gimnasia y Esgrima de Jujuy", "Talleres de Córdoba", "Newell's Old Boys", "Instituto"], answer: 0 },
+                    { q: "¿En qué cancha se jugó ese partido en el que Scotta llegó a los 60 goles, un 28 de diciembre de 1975?", options: ["Cancha de Huracán", "El Gasómetro", "Cancha de Ferro", "El Cilindro"], answer: 0 },
+                    { q: "¿Cuántos goles había hecho Arsenio Erico en 1937, el récord que superó Scotta?", options: ["47", "40", "52", "35"], answer: 0 },
+                    { q: "¿A qué equipo argentino eliminó San Lorenzo por penales en cuartos de final de la Copa Sudamericana 2002?", options: ["Racing Club", "Vélez Sarsfield", "Independiente", "Boca Juniors"], answer: 0 },
+                    { q: "¿A qué equipo boliviano eliminó San Lorenzo en semifinales de la Sudamericana 2002?", options: ["Bolívar", "The Strongest", "Wilstermann", "Oriente Petrolero"], answer: 0 },
+                    { q: "¿Cuántos goles marcó Rodrigo Astudillo en la Copa Sudamericana 2002, siendo uno de los máximos goleadores del torneo?", options: ["4", "3", "5", "2"], answer: 0 },
+                    { q: "¿Aproximadamente cuántos espectadores presenciaron la vuelta de la final de la Sudamericana 2002 en el Nuevo Gasómetro?", options: ["Cerca de 40.000", "Cerca de 20.000", "Cerca de 60.000", "Cerca de 15.000"], answer: 0 },
+                    { q: "¿En qué fecha se jugó la ida de la final de la Copa Mercosur 2001 en el Maracaná?", options: ["12 de diciembre de 2001", "24 de enero de 2002", "5 de diciembre de 2001", "19 de diciembre de 2001"], answer: 0 },
+                    { q: "¿Por qué tuvo que postergarse la vuelta de la final de la Copa Mercosur 2001, originalmente prevista para el 19 de diciembre?", options: ["Por disturbios sociales en Argentina", "Por una lesión masiva", "Por el estadio en obras", "Por el calendario de la Selección"], answer: 0 },
+                    { q: "¿Qué porcentaje de los 108 goles que hizo San Lorenzo en 1975 anotó Scotta él solo?", options: ["55%", "40%", "70%", "30%"], answer: 0 }
                 ],
                 socio: [ 
                     { q: "¿Cuál es la fecha de fundación del club?", options: ["1 de abril de 1908", "25 de mayo de 1905", "1 de enero de 1910", "12 de octubre de 1908"], answer: 0 }, 
@@ -1187,7 +1590,25 @@
                     { q: "¿En qué año se jugó el último partido en el Viejo Gasómetro?", options: ["1979", "1981", "1983", "1993"], answer: 0 }, 
                     { q: "¿Cuál fue el resultado de la final de la Libertadores 2014 contra Nacional de Paraguay (ida y vuelta global)?", options: ["1-0 global", "2-1 global", "3-2 global", "3-0 global"], answer: 1 },
                     { q: "¿Qué nombre recibe el equipo heroico de fines de los 80 sin recursos económicos y sin cancha?", options: ["Los Matadores", "Los Camboyanos", "Los Forzosos", "Los Guerreros"], answer: 1 },
-                    { q: "¿Cuál era el nombre original pensado por los jóvenes fundadores antes de San Lorenzo?", options: ["Los Forzosos de Almagro", "Estrella de Boedo", "Ciclón Porteño", "Atlético Boedo"], answer: 0 }
+                    { q: "¿Cuál era el nombre original pensado por los jóvenes fundadores antes de San Lorenzo?", options: ["Los Forzosos de Almagro", "Estrella de Boedo", "Ciclón Porteño", "Atlético Boedo"], answer: 0 },
+                    { q: "¿Qué puesto ocupaba San Lorenzo entre los clasificados a la ronda de playoffs de la Libertadores 2014?", options: ["15°", "10°", "5°", "20°"], answer: 0 },
+                    { q: "¿Qué puesto ocupaba Nacional de Paraguay entre esos clasificados, reflejando lo pareja que fue la final?", options: ["16°", "12°", "8°", "18°"], answer: 0 },
+                    { q: "¿Quién fue el árbitro brasileño elegido para dirigir la vuelta de la final de la Libertadores 2014?", options: ["Sandro Ricci", "Wilmar Roldán", "Márcio Rezende", "Roberto Tobar"], answer: 0 },
+                    { q: "¿Cuántos goles convirtió Héctor Scotta en apenas los últimos 8 partidos oficiales de 1975 para llegar a los 60?", options: ["12", "8", "15", "10"], answer: 0 },
+                    { q: "¿En qué localidad santafesina nació Héctor Scotta?", options: ["San Justo", "Rafaela", "Rosario", "Reconquista"], answer: 0 },
+                    { q: "¿De qué club uruguayo llegó Sergio Villar a San Lorenzo en 1968?", options: ["Defensor", "Peñarol", "Nacional", "Danubio"], answer: 0 },
+                    { q: "¿Cuánto se pagó por el fichaje de Sergio Villar en 1968, según cuenta la historia del club?", options: ["10 millones de pesos", "5 millones de pesos", "20 millones de pesos", "2 millones de pesos"], answer: 0 },
+                    { q: "¿En qué club se retiró Sergio Villar tras dejar San Lorenzo?", options: ["Atlético All Boys", "Chacarita Juniors", "Platense", "Tigre"], answer: 0 },
+                    { q: "¿Cuántos goles convirtió Sergio Villar en sus 446 partidos con San Lorenzo?", options: ["6", "2", "15", "0"], answer: 0 },
+                    { q: "¿Quién dirigía a San Lorenzo cuando debutó Sergio Villar en 1968?", options: ["Tim (Elba de Pádua Lima)", "Rogelio Domínguez", "Osvaldo Zubeldía", "Marcelo Trobbiani"], answer: 0 },
+                    { q: "¿De qué nacionalidad era Tim, el entrenador de San Lorenzo que hizo debutar a Sergio Villar?", options: ["Brasileña", "Uruguaya", "Argentina", "Paraguaya"], answer: 0 },
+                    { q: "¿En qué estadio de Medellín se jugó la ida de la final de la Sudamericana 2002?", options: ["Atanasio Girardot", "El Campín", "Pascual Guerrero", "Metropolitano de Barranquilla"], answer: 0 },
+                    { q: "¿Aproximadamente cuántos espectadores presenciaron el partido de ida de la final de la Sudamericana 2002, en Medellín?", options: ["Cerca de 52.000", "Cerca de 30.000", "Cerca de 65.000", "Cerca de 20.000"], answer: 0 },
+                    { q: "¿Quién fue el árbitro de la ida de la final de la Copa Sudamericana 2002?", options: ["Márcio Rezende", "Epifanio González", "Oscar Ruiz", "Horacio Elizondo"], answer: 0 },
+                    { q: "¿Quién fue el árbitro de la vuelta de esa final, disputada en Buenos Aires?", options: ["Epifanio González", "Márcio Rezende", "Oscar Ruiz", "Wilmar Roldán"], answer: 0 },
+                    { q: "¿Aproximadamente cuántos espectadores presenciaron la vuelta de la final de la Copa Mercosur 2001 en el Nuevo Gasómetro?", options: ["Cerca de 40.000", "Cerca de 20.000", "Cerca de 60.000", "Cerca de 15.000"], answer: 0 },
+                    { q: "¿Por qué fue única entre todas las ediciones la final de la Copa Mercosur 2001 que ganó San Lorenzo?", options: ["Fue la única entre un equipo argentino y uno brasileño, y la única definida por penales", "Fue la única jugada en un solo partido", "Fue la única sin público", "Fue la única suspendida"], answer: 0 },
+                    { q: "¿Quién fue el árbitro de la vuelta de la final de la Copa Mercosur 2001, disputada en el Nuevo Gasómetro?", options: ["Oscar Ruiz", "Epifanio González", "Márcio Rezende", "Horacio Elizondo"], answer: 0 }
                 ]
             },
             "Huracán": {
@@ -1239,6 +1660,7 @@
         let currentOptionsMap = [];
         let isChicana = false; 
         let chicanaAprobada = false;
+        let chicanaResult = null; // null | "correcta" | "fallada" — base para el futuro sistema de puntos/trofeo
 
         function setClubBackground(club) {
             const gameScreen = document.getElementById('game-screen');
@@ -1252,6 +1674,8 @@
             else if (club === "Huracán") gameScreen.classList.add('bg-huracan');
             else if (club === "Lanús") gameScreen.classList.add('bg-lanus');
             else if (club === "Banfield") gameScreen.classList.add('bg-banfield');
+            else if (club === "Estudiantes (LP)") gameScreen.classList.add('bg-estudiantes');
+            else if (club === "Gimnasia (LP)") gameScreen.classList.add('bg-gimnasia');
         }
 
         function startGame() {
